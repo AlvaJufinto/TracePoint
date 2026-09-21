@@ -222,7 +222,7 @@ const Trace = () => {
 	const [edges, , onEdgesChange] = useEdgesState(initialEdges);
 	const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
-	const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+	const onNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
 		if (node.id === "pt-dwimuria") {
 			setSelectedNode("pt-dwimuria");
 			return;
