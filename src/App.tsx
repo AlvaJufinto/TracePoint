@@ -13,6 +13,7 @@ const router = createBrowserRouter([
 	{ path: "/search", element: <SearchPage /> },
 	{ path: "/trace", element: <Trace /> },
 	{ path: "/investigation", element: <Investigation /> },
+
 	{ path: "*", element: <NotFound /> },
 ]);
 
