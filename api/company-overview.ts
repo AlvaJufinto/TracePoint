@@ -64,7 +64,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		});
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : "Unknown error";
-		console.error("Sectors API error:", err);
+		console.error("Sectors API error:", msg);
 		return errorResponse(res, 502, "Failed to fetch company overview");
 	}
 }
