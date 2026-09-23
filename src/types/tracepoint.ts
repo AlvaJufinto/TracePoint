@@ -62,9 +62,9 @@ export interface TracePointOwnershipSnapshot {
 
 export interface TracePointShareholder {
   name: string;
-  shareValue: number;      // IDR — may be 0 or undefined in edge cases
-  shareAmount: number;     // Number of shares
-  sharePercentage: number; // Parsed from string "0.54942"
+  shareValue: number | null;      // IDR — may be 0 or undefined in edge cases
+  shareAmount: number | null;     // Number of shares
+  sharePercentage: number | null; // Parsed from string "0.54942"
   symbol?: string;         // Corporate ticker if present (optional)
 }
 
@@ -90,7 +90,7 @@ export interface TracePointManagement {
 export interface TracePointFreeFloat {
   ticker: string;
   companyName: string;
-  freeFloat: number;       // Decimal, e.g. 0.45058
+  freeFloat: number | null;       // Decimal, e.g. 0.45058
 }
 
 // ---------------------------------------------------------------------------
@@ -106,33 +106,33 @@ export interface TracePointComposition {
 
 export interface TracePointCompositionSnapshot {
   date: string;            // YYYY-MM-DD
-  sharesNumber: number;
+  sharesNumber: number | null;
   local: {
-    insurance: number;
-    corporate: number;
-    pensionFund: number;
-    financialInstitutions: number;
-    individual: number;
-    mutualFund: number;
-    securitiesCompanies: number;
-    foundation: number;
-    other: number;
-    total: number;
+    insurance: number | null;
+    corporate: number | null;
+    pensionFund: number | null;
+    financialInstitutions: number | null;
+    individual: number | null;
+    mutualFund: number | null;
+    securitiesCompanies: number | null;
+    foundation: number | null;
+    other: number | null;
+    total: number | null;
   };
   foreign: {
-    insurance: number;
-    corporate: number;
-    pensionFund: number;
-    financialInstitutions: number;
-    individual: number;
-    mutualFund: number;
-    securitiesCompanies: number;
-    foundation: number;
-    other: number;
-    total: number;
+    insurance: number | null;
+    corporate: number | null;
+    pensionFund: number | null;
+    financialInstitutions: number | null;
+    individual: number | null;
+    mutualFund: number | null;
+    securitiesCompanies: number | null;
+    foundation: number | null;
+    other: number | null;
+    total: number | null;
   };
-  numberOfShareholders: number;
-  changeInShareholders: number;
+  numberOfShareholders: number | null;
+  changeInShareholders: number | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -203,6 +203,8 @@ export type TraceVerification =
       status: 'confirmed';
       screenerName: string;
       ownershipName: string;
+      sharePercentage?: number | null;
+      shareAmount?: number | null;
       ticker: string;
     }
   | {

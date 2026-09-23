@@ -40,9 +40,9 @@ function isTracePointShareholder(data: unknown): data is TracePointShareholder {
   if (!data || typeof data !== 'object') return false;
   const d = data as Record<string, unknown>;
   if (typeof d.name !== 'string') return false;
-  if (typeof d.shareValue !== 'number') return false;
-  if (typeof d.shareAmount !== 'number') return false;
-  if (typeof d.sharePercentage !== 'number') return false;
+  if (d.shareValue !== null && (typeof d.shareValue !== 'number' || !Number.isFinite(d.shareValue))) return false;
+  if (d.shareAmount !== null && (typeof d.shareAmount !== 'number' || !Number.isFinite(d.shareAmount))) return false;
+  if (d.sharePercentage !== null && (typeof d.sharePercentage !== 'number' || !Number.isFinite(d.sharePercentage))) return false;
   // symbol is optional
   return true;
 }
@@ -90,7 +90,7 @@ export function isTracePointFreeFloat(data: unknown): data is TracePointFreeFloa
   const d = data as Record<string, unknown>;
   if (typeof d.ticker !== 'string') return false;
   if (typeof d.companyName !== 'string') return false;
-  if (typeof d.freeFloat !== 'number') return false;
+  if (d.freeFloat !== null && (typeof d.freeFloat !== 'number' || !Number.isFinite(d.freeFloat))) return false;
   return true;
 }
 
@@ -128,7 +128,7 @@ export function isTracePointCorporateActions(data: unknown): data is TracePointC
 export function isTraceVerification(data: unknown): data is TraceVerification {
   if (!data || typeof data !== 'object') return false;
   const d = data as Record<string, unknown>;
-  if (typeof d.status !== 'string') return false;
+  if (!['confirmed', 'mismatch', 'not_found'].includes(String(d.status))) return false;
   if (typeof d.screenerName !== 'string') return false;
   if (typeof d.ticker !== 'string') return false;
 

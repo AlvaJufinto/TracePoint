@@ -1,175 +1,38 @@
-/** @format */
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { sectorsFetch, isValidTicker } from './_lib/sectors-fetch';
+import { checkTraceLimit, errorResponse, getClientIp, successResponse, isNonTraceableShareholder } from './_lib/server';
+import type { TraceCandidate, TraceVerification } from '../src/types/tracepoint';
 
-import type { VercelRequest, VercelResponse } from "@vercel/node";
-
-import { sectorsFetch } from "./_lib/sectors-fetch";
-import {
-	checkTraceLimit,
-	errorResponse,
-	getClientIp,
-	successResponse,
-} from "./_lib/server";
-
-export const config = { runtime: "nodejs" };
+export const config = { runtime: 'nodejs' };
+const normalizeName = (name: string) => name.trim().replace(/\s+/g, ' ').toLowerCase();
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-	if (req.method !== "POST") {
-		return errorResponse(res, 405, "Method not allowed");
-	}
-
-	const body = req.body;
-	if (!body || Array.isArray(body)) {
-		return errorResponse(res, 400, "Request body must be a JSON object");
-	}
-
-	const candidates = body.candidates;
-	const maxBatchSize = body.maxBatchSize;
-
-	if (!Array.isArray(candidates) || candidates.length === 0) {
-		return errorResponse(res, 400, "candidates array is required");
-	}
-
-	if (candidates.length > 200) {
-		return errorResponse(res, 400, "Maximum 200 candidates per request");
-	}
-
-	if (
-		maxBatchSize &&
-		(typeof maxBatchSize !== "number" ||
-			maxBatchSize <= 0 ||
-			maxBatchSize > 200)
-	) {
-		return errorResponse(res, 400, "maxBatchSize must be between 1 and 200");
-	}
-
-	const ip = getClientIp(req);
-	const traceLimit = checkTraceLimit(ip, maxBatchSize ?? undefined);
-
-	if (!traceLimit.allowed) {
-		return errorResponse(
-			res,
-			429,
-			`Trace limit exceeded: ${traceLimit.reason}`,
-		);
-	}
-
-	const limit = traceLimit.limit;
-	const candidatesToProcess = candidates.slice(0, limit);
-	const limited = candidates.length > limit;
-
-	const results: Array<{
-		ticker: string;
-		candidateName: string;
-		confirmed: boolean;
-		confidence: number;
-		matchedShareholder?: string;
-		matchedCompany?: string;
-	}> = [];
-
-	for (const candidate of candidatesToProcess) {
-		const result = await verifyCandidate(candidate);
-		results.push(result);
-	}
-
-	return successResponse(res, {
-		verified: results,
-		limited,
-		limit,
-		totalRequested: candidates.length,
-	});
-}
-
-async function verifyCandidate(candidate: {
-	ticker: string;
-	name: string;
-}): Promise<{
-	ticker: string;
-	candidateName: string;
-	confirmed: boolean;
-	confidence: number;
-	matchedShareholder?: string;
-	matchedCompany?: string;
-}> {
-	try {
-		const [companyData, ownershipData] = await Promise.all([
-			sectorsFetch<{ symbol: string; company_name: string }>(
-				`company/report/${candidate.ticker}`,
-				{ sections: "overview" },
-			),
-			sectorsFetch<{
-				major_shareholders?: Array<{ name: string; share_percentage?: string }>;
-				whale_investors?: string[] | null;
-				conglomerates_group?: string[] | null;
-			}>(`company/report/${candidate.ticker}`, { sections: "ownership" }),
-		]);
-
-		const shareholders = ownershipData?.major_shareholders ?? [];
-		const whaleInvestors = ownershipData?.whale_investors ?? [];
-		const conglomerates = ownershipData?.conglomerates_group ?? [];
-
-		const allNames = [
-			...shareholders.map((s) => s.name),
-			...whaleInvestors,
-			...conglomerates,
-		];
-
-		const name = candidate.name.trim().toLowerCase();
-		let bestMatch: string | undefined;
-		let bestConfidence = 0;
-
-		for (const apiName of allNames) {
-			if (!apiName) continue;
-			const apiNameLower = apiName.trim().toLowerCase();
-
-			if (apiNameLower === name) {
-				bestMatch = apiName;
-				bestConfidence = 1;
-				break;
-			}
-
-			if (
-				apiNameLower.includes(name) &&
-				apiNameLower.length > name.length + 2
-			) {
-				const score =
-					name.split(" ").filter((w) => apiNameLower.includes(w)).length /
-					Math.max(name.split(" ").length, 1);
-				if (score > bestConfidence) {
-					bestConfidence = score;
-					bestMatch = apiName;
-				}
-			}
-
-			if (
-				name.includes(apiNameLower) &&
-				name.length > apiNameLower.length + 3
-			) {
-				const score =
-					apiNameLower.split(" ").filter((w) => name.includes(w)).length /
-					Math.max(apiNameLower.split(" ").length, 1);
-				if (score > bestConfidence) {
-					bestConfidence = score;
-					bestMatch = apiName;
-				}
-			}
-		}
-
-		return {
-			ticker: candidate.ticker,
-			candidateName: candidate.name,
-			confirmed: bestConfidence >= 0.7,
-			confidence: bestConfidence,
-			matchedShareholder: bestMatch,
-			matchedCompany: companyData?.company_name ?? undefined,
-		};
-	} catch (err) {
-		const msg = err instanceof Error ? err.message : "Unknown error";
-		console.error("Verification error for", candidate.ticker, ":", msg);
-		return {
-			ticker: candidate.ticker,
-			candidateName: candidate.name,
-			confirmed: false,
-			confidence: 0,
-		};
-	}
+  if (req.method !== 'POST') return errorResponse(res, 405, 'Method not allowed');
+  const candidates = req.body?.candidates;
+  if (!Array.isArray(candidates) || !candidates.length || candidates.length > 200 ||
+    candidates.some(c => !c || typeof c.ticker !== 'string' || !isValidTicker(c.ticker) ||
+      typeof c.screenerName !== 'string' || !c.screenerName.trim() || c.screenerName.length > 300 || isNonTraceableShareholder(c.screenerName))) {
+    return errorResponse(res, 400, 'Valid candidate tickers and shareholder names are required');
+  }
+  // A server-owned cap is applied before any upstream request.
+  const limit = checkTraceLimit(getClientIp(req), 5);
+  if (!limit.allowed) return errorResponse(res, 429, 'Too many trace requests. Please try again later.');
+  const unique: TraceCandidate[] = [...new Map(candidates.map(c => [c.ticker, c])).values()] as TraceCandidate[];
+  const batch = unique.slice(0, limit.limit);
+  const results: TraceVerification[] = [];
+  for (const candidate of batch) {
+    try {
+      const report = await sectorsFetch<{ ownership?: { major_shareholders?: Array<{name: string; share_percentage?: string | number | null; share_amount?: number | null}> } }>(
+        `company/report/${candidate.ticker}`, { sections: 'ownership' });
+      const match = report.ownership?.major_shareholders?.find(holder => normalizeName(holder.name) === normalizeName(candidate.screenerName));
+      results.push(match ? {
+        status: 'confirmed', ticker: candidate.ticker, screenerName: candidate.screenerName, ownershipName: match.name,
+        sharePercentage: match.share_percentage == null || match.share_percentage === '' || !Number.isFinite(Number(match.share_percentage)) ? null : Number(match.share_percentage),
+        shareAmount: match.share_amount ?? null,
+      } : { status: 'mismatch', ticker: candidate.ticker, screenerName: candidate.screenerName });
+    } catch {
+      results.push({ status: 'not_found', ticker: candidate.ticker, screenerName: candidate.screenerName });
+    }
+  }
+  return successResponse(res, { results, processed: results.length, limited: unique.length > batch.length, maxBatch: limit.limit });
 }

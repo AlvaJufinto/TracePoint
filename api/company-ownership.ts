@@ -11,7 +11,6 @@ import {
 	checkRateLimit,
 	errorResponse,
 	getClientIp,
-	isNonTraceableShareholder,
 	rateLimitResponse,
 	successResponse,
 } from "./_lib/server";
@@ -62,25 +61,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		const whales = ownershipData.ownership?.whale_investors ?? null;
 
 		// Parse and filter ownership holders
-		const traceableHolders: Array<{
+		const holders: Array<{
 			name: string;
-			shareValue: number;
-			shareAmount: number;
-			sharePercentage: number;
+			shareValue: number | null;
+			shareAmount: number | null;
+			sharePercentage: number | null;
 			symbol?: string;
 		}> = [];
 
 		for (const sh of holdersRaw) {
-			const pct = parseFloat((sh.share_percentage ?? "0").toString());
-			if (isNaN(pct)) continue;
+			const raw = sh.share_percentage;
+			const pct = raw == null || raw === "" || !Number.isFinite(Number(raw)) ? null : Number(raw);
 
-			// Skip non-traceable (Public, Treasury Stock)
-			if (isNonTraceableShareholder(sh.name)) continue;
-
-			traceableHolders.push({
+			holders.push({
 				name: sh.name,
-				shareValue: sh.share_value ?? 0,
-				shareAmount: sh.share_amount ?? 0,
+				shareValue: sh.share_value ?? null,
+				shareAmount: sh.share_amount ?? null,
 				sharePercentage: pct,
 				symbol: sh.symbol ?? undefined,
 			});
@@ -89,8 +85,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		return successResponse(res, {
 			ticker: normalized,
 			companyName: ownershipData.company_name,
-			// Major shareholders (traceable only — NOT Public/Treasury)
-			holders: traceableHolders,
+			// Preserve aggregate entries; the UI disables tracing for Public/Treasury.
+			holders,
 			// Context metadata (NOT ownership edges)
 			whaleInvestors: whales,
 			conglomeratesGroup:

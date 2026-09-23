@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
-import { Search, Building2, GitBranch, ArrowRight } from 'lucide-react';
+import { Search, Building2, GitBranch } from 'lucide-react';
 
 export default function Home() {
   return (
-    <div className="mx-auto max-w-3xl py-12">
+    <div className="mx-auto max-w-3xl py-6 sm:py-12">
       <div className="text-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)]">
+        <div className="inline-flex items-center gap-2 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)]">
           Ownership relationship explorer
         </div>
 
@@ -27,7 +27,7 @@ export default function Home() {
             Search a company
           </Link>
 
-          <div className="flex items-center gap-2 text-sm text-[var(--color-muted)]">
+          <div className="flex flex-wrap justify-center items-center gap-2 text-sm text-[var(--color-muted)]">
             <span>Try:</span>
             {['BBCA', 'BREN', 'ADRO', 'AMMN', 'TLKM'].map((ticker) => (
               <Link
@@ -42,8 +42,8 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="mt-16 grid gap-6 sm:grid-cols-3">
-        <div className="rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white p-6">
+      <div className="mt-12 grid gap-6 sm:grid-cols-3">
+        <div className="rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-transparent p-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-accent)]/10">
             <Search size={20} className="text-[var(--color-primary)]" strokeWidth={2.5} />
           </div>
@@ -69,25 +69,10 @@ export default function Home() {
           </div>
           <h2 className="mt-4 text-base font-bold text-[var(--color-primary)]">Trace</h2>
           <p className="mt-1 text-sm text-[var(--color-muted)]">
-            Follow a shareholder across companies and verify connections.
+            Find candidate companies, then check for exact shareholder names in ownership reports.
           </p>
         </div>
       </div>
-
-      <div className="mt-12 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white p-6">
-        <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
-          <span className="font-semibold text-[var(--color-primary)]">How it works</span>
-          <span className="text-[var(--color-muted)]">Search → Inspect ownership → Select shareholder → Trace → Continue investigation</span>
-          <Link
-            to="/search"
-            className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-primary)] hover:text-[var(--color-accent)] transition-colors"
-          >
-            Start now
-            <ArrowRight size={12} />
-          </Link>
-        </div>
-      </div>
-
       <div className="mt-8 text-center text-xs text-[var(--color-muted)]">
         Data is reported by Sectors. Ownership percentages are as reported and may not sum to 100%.
       </div>

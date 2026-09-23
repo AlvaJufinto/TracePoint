@@ -89,7 +89,6 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
 export async function getCompanyOverview(
 	ticker: string,
 ): Promise<TracePointCompany> {
-	console.log("🚀 ~ getCompanyOverview ~ ticker:", ticker);
 	const data = await apiFetch<TracePointCompany>(
 		`/company-overview?ticker=${encodeURIComponent(ticker)}`,
 	);

@@ -46,6 +46,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 			// The API returns monthly snapshots; we select latest
 			data?: Array<{
 				date: string;
+				local?: Record<string, number | null>;
+				foreign?: Record<string, number | null>;
 				shares_number: number;
 				insurance_l?: number;
 				corporate_l?: number;
@@ -82,47 +84,47 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
 		// Select latest snapshot by date (not array position)
 		const snapshots = compositionData.data
-			.filter((s) => s.date && s.shares_number > 0)
+			.filter((s) => s.date)
 			.sort((a, b) => b.date.localeCompare(a.date));
 
 		const cleanSnapshots = snapshots.map((snapshot) => ({
 			date: snapshot.date,
 			sharesNumber: snapshot.shares_number,
 			local: {
-				insurance: snapshot.insurance_l ?? 0,
-				corporate: snapshot.corporate_l ?? 0,
-				pensionFund: snapshot.pension_fund_l ?? 0,
+				insurance: snapshot.local?.insurance_l ?? snapshot.insurance_l ?? null,
+				corporate: snapshot.local?.corporate_l ?? snapshot.corporate_l ?? null,
+				pensionFund: snapshot.local?.pension_fund_l ?? snapshot.pension_fund_l ?? null,
 				financialInstitutions:
-					snapshot.financial_institutions_l ?? 0,
-				individual: snapshot.individual_l ?? 0,
-				mutualFund: snapshot.mutual_fund_l ?? 0,
+					snapshot.local?.financial_institutions_l ?? snapshot.financial_institutions_l ?? null,
+				individual: snapshot.local?.individual_l ?? snapshot.individual_l ?? null,
+				mutualFund: snapshot.local?.mutual_fund_l ?? snapshot.mutual_fund_l ?? null,
 				securitiesCompanies:
-					snapshot.securities_companies_l ?? 0,
-				foundation: snapshot.foundation_l ?? 0,
-				other: snapshot.other_l ?? 0,
-				total: snapshot.total_l ?? 0,
+					snapshot.local?.securities_companies_l ?? snapshot.securities_companies_l ?? null,
+				foundation: snapshot.local?.foundation_l ?? snapshot.foundation_l ?? null,
+				other: snapshot.local?.other_l ?? snapshot.other_l ?? null,
+				total: snapshot.local?.total_l ?? snapshot.total_l ?? null,
 			},
 			foreign: {
-				insurance: snapshot.insurance_f ?? 0,
-				corporate: snapshot.corporate_f ?? 0,
-				pensionFund: snapshot.pension_fund_f ?? 0,
+				insurance: snapshot.foreign?.insurance_f ?? snapshot.insurance_f ?? null,
+				corporate: snapshot.foreign?.corporate_f ?? snapshot.corporate_f ?? null,
+				pensionFund: snapshot.foreign?.pension_fund_f ?? snapshot.pension_fund_f ?? null,
 				financialInstitutions:
-					snapshot.financial_institutions_f ?? 0,
-				individual: snapshot.individual_f ?? 0,
-				mutualFund: snapshot.mutual_fund_f ?? 0,
+					snapshot.foreign?.financial_institutions_f ?? snapshot.financial_institutions_f ?? null,
+				individual: snapshot.foreign?.individual_f ?? snapshot.individual_f ?? null,
+				mutualFund: snapshot.foreign?.mutual_fund_f ?? snapshot.mutual_fund_f ?? null,
 				securitiesCompanies:
-					snapshot.securities_companies_f ?? 0,
-				foundation: snapshot.foundation_f ?? 0,
-				other: snapshot.other_f ?? 0,
-				total: snapshot.total_f ?? 0,
+					snapshot.foreign?.securities_companies_f ?? snapshot.securities_companies_f ?? null,
+				foundation: snapshot.foreign?.foundation_f ?? snapshot.foundation_f ?? null,
+				other: snapshot.foreign?.other_f ?? snapshot.other_f ?? null,
+				total: snapshot.foreign?.total_f ?? snapshot.total_f ?? null,
 			},
-			numberOfShareholders: snapshot.numbers_of_shareholders ?? 0,
-			changeInShareholders: snapshot.change_in_shareholders ?? 0,
+			numberOfShareholders: snapshot.numbers_of_shareholders ?? null,
+			changeInShareholders: snapshot.change_in_shareholders ?? null,
 		}));
 
 		return successResponse(res, {
 			ticker: normalized,
-			year: compositionData.year ?? Number(snapshots[0].date.slice(0, 4)),
+			year: compositionData.year ?? (snapshots[0] ? Number(snapshots[0].date.slice(0, 4)) : undefined),
 			latestSnapshot: cleanSnapshots[0] ?? null,
 			snapshots: cleanSnapshots,
 		});
