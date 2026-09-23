@@ -1,114 +1,183 @@
-/**
- * Trace page — Ownership graph with ReactFlow.
- *
- * Displays real ownership data fetched from Sectors API via the server proxy.
- * Graph edges are rendered from API ownership data.
- *
- * [Verified] against live Sectors API responses on 2026-09-22.
- */
+/** @format */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import ReactFlow, { Background, type Edge, type Node, Handle, Position } from 'reactflow';
-import 'reactflow/dist/style.css';
+import "reactflow/dist/style.css";
+
 import {
-  AlertCircle,
-  Building2,
-  User,
-  LineChart,
-  GitBranch,
-  Search,
-} from 'lucide-react';
+	type MouseEvent,
+	useCallback,
+	useEffect,
+	useMemo,
+	useState,
+} from "react";
+
+import ELK from "elkjs/lib/elk.bundled.js";
+import { Building2, Search, User } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import ReactFlow, {
+	Background,
+	type Edge,
+	Handle,
+	type Node,
+	Position,
+} from "reactflow";
+
 import {
-  getCompanyOverview,
-  getCompanyOwnership,
-  getCompanyManagement,
-  getFreeFloat,
-  getShareholderComposition,
-  getCorporateActions,
-} from '../lib/tracepoint-api';
+	getCompanyManagement,
+	getCompanyOverview,
+	getCompanyOwnership,
+	getCorporateActions,
+	getFreeFloat,
+	getShareholderComposition,
+	searchByShareholderName,
+} from "../lib/tracepoint-api";
 import type {
-  TracePointCompany,
-  TracePointOwnershipSnapshot,
-  TracePointManagement,
-  TracePointFreeFloat,
-  TracePointComposition,
-  TracePointCorporateActions,
-  OwnershipEdge as OwnershipEdgeType,
-  MetadataEdge,
-  GraphNode,
-  PanelState,
-} from '../types/tracepoint';
+	GraphNode,
+	MetadataEdge,
+	OwnershipEdge as OwnershipEdgeType,
+	PanelState,
+	TracePointCompany,
+	TracePointComposition,
+	TracePointCorporateActions,
+	TracePointFreeFloat,
+	TracePointManagement,
+	TracePointOwnershipSnapshot,
+	TraceCandidate,
+} from "../types/tracepoint";
+
+import TraceResultsDrawer from "../components/TraceResultsDrawer";
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const elk = new ELK();
+
+const NODE_WIDTH = 260;
+const NODE_HEIGHT = 72;
+
+const elkLayoutOptions = {
+	"elk.algorithm": "layered",
+	"elk.direction": "RIGHT",
+
+	"elk.spacing.nodeNode": "60",
+	"elk.spacing.edgeNode": "40",
+
+	"elk.layered.spacing.nodeNodeBetweenLayers": "220",
+	"elk.layered.spacing.edgeNodeBetweenLayers": "80",
+
+	"elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
+	"elk.layered.crossingMinimization.strategy": "LAYER_SWEEP",
+
+	"elk.edgeRouting": "ORTHOGONAL",
+
+	"elk.padding": "[top=100,left=100,bottom=100,right=100]",
+};
 
 // ---------------------------------------------------------------------------
 // Panel state helper
 // ---------------------------------------------------------------------------
 
 function createPanelState<T>(): PanelState<T> {
-  return { status: 'loading', data: null, error: null };
+	return {
+		status: "loading",
+		data: null,
+		error: null,
+	};
 }
 
 // ---------------------------------------------------------------------------
-// Node/Edge types for ReactFlow
+// Node / edge types
 // ---------------------------------------------------------------------------
 
 type EntityNodeData = {
-  label: string;
-  subLabel: string;
-  dotColor: 'purple' | 'orange' | 'cyan' | 'green' | 'gray';
-  nodeType: 'company' | 'shareholder' | 'management' | 'affiliate' | 'conglomerate';
-  ticker?: string;
+	label: string;
+	subLabel: string;
+	dotColor: "purple" | "orange" | "cyan" | "green" | "gray";
+	nodeType:
+		| "company"
+		| "shareholder"
+		| "management"
+		| "affiliate"
+		| "conglomerate";
+	ticker?: string;
 };
 
 type EntityNode = Node<EntityNodeData>;
 
-const dotColors: Record<EntityNodeData['dotColor'], string> = {
-  purple: 'bg-[#a87ffb]',
-  orange: 'bg-[#f5a623]',
-  cyan: 'bg-[#00c3d9]',
-  green: 'bg-[#4ade80]',
-  gray: 'bg-[#6b7280]',
+// ---------------------------------------------------------------------------
+// Colors
+// ---------------------------------------------------------------------------
+
+const dotColors: Record<EntityNodeData["dotColor"], string> = {
+	purple: "bg-purple-500",
+	orange: "bg-orange-500",
+	cyan: "bg-[var(--color-primary)]",
+	green: "bg-green-500",
+	gray: "bg-gray-400",
 };
 
+// ---------------------------------------------------------------------------
+// Custom ReactFlow node
+// ---------------------------------------------------------------------------
+
 const CustomEntityNode = ({
-  data,
-  selected,
+	data,
+	selected,
 }: {
-  data: EntityNodeData;
-  selected?: boolean;
+	data: EntityNodeData;
+	selected?: boolean;
 }) => {
-  return (
-    <div
-      className={`min-w-[200px] flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg transition-colors ${
-        selected
-          ? 'border-[#00c3d9] bg-[#0d2232] ring-2 ring-[#00c3d9]/30'
-          : 'border-[#1d3245] bg-[#0c1824]'
-      }`}
-    >
-      <Handle
-        type="target"
-        position={Position.Left}
-        className="!h-1 !w-1 !border-0 !bg-transparent"
-      />
+	const hasTarget =
+		data.nodeType === "company" ||
+		data.nodeType === "affiliate" ||
+		data.nodeType === "conglomerate";
 
-      <div className={`h-3 w-3 shrink-0 rounded-full ${dotColors[data.dotColor]}`} />
+	const hasSource =
+		data.nodeType === "company" || data.nodeType === "shareholder";
 
-      <div className="min-w-0">
-        <div className="text-sm font-bold text-white truncate">{data.label}</div>
-        <div className="text-xs text-gray-400 truncate">{data.subLabel}</div>
-      </div>
+	return (
+		<div
+			className={`relative flex h-[72px] w-[260px] items-center gap-3 rounded-[var(--radius-sm)] border px-4 py-3 shadow-sm transition-colors ${
+				selected
+					? "border-[var(--color-accent)] bg-[var(--color-accent)]/10 ring-2 ring-[var(--color-accent)]/40"
+					: "border-[var(--color-border)] bg-white"
+			}`}
+		>
+			{hasTarget && (
+				<Handle
+					type="target"
+					position={Position.Left}
+					className="!h-2 !w-2 !border-0 !bg-[var(--color-primary)]"
+				/>
+			)}
 
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="!h-1 !w-1 !border-0 !bg-transparent"
-      />
-    </div>
-  );
+			<div
+				className={`h-3 w-3 shrink-0 rounded-full ${dotColors[data.dotColor]}`}
+			/>
+
+			<div className="min-w-0 flex-1">
+				<div className="truncate text-sm font-bold text-[var(--color-primary)]">
+					{data.label}
+				</div>
+
+				<div className="truncate text-xs text-[var(--color-muted)]">
+					{data.subLabel}
+				</div>
+			</div>
+
+			{hasSource && (
+				<Handle
+					type="source"
+					position={Position.Right}
+					className="!h-2 !w-2 !border-0 !bg-[var(--color-primary)]"
+				/>
+			)}
+		</div>
+	);
 };
 
 const nodeTypes = {
-  customEntity: CustomEntityNode,
+	customEntity: CustomEntityNode,
 };
 
 // ---------------------------------------------------------------------------
@@ -116,223 +185,473 @@ const nodeTypes = {
 // ---------------------------------------------------------------------------
 
 function buildGraphData(
-  company: TracePointCompany | null,
-  ownership: TracePointOwnershipSnapshot | null,
-  management: TracePointManagement | null,
+	company: TracePointCompany | null,
+	ownership: TracePointOwnershipSnapshot | null,
+	management: TracePointManagement | null,
 ): {
-  nodes: GraphNode[];
-  ownershipEdges: OwnershipEdgeType[];
-  metadataEdges: MetadataEdge[];
+	nodes: GraphNode[];
+	ownershipEdges: OwnershipEdgeType[];
+	metadataEdges: MetadataEdge[];
 } {
-  const nodes: GraphNode[] = [];
-  const ownershipEdges: OwnershipEdgeType[] = [];
-  const metadataEdges: MetadataEdge[] = [];
+	const nodes: GraphNode[] = [];
+	const ownershipEdges: OwnershipEdgeType[] = [];
+	const metadataEdges: MetadataEdge[] = [];
 
-  if (!company) return { nodes, ownershipEdges, metadataEdges };
+	if (!company) {
+		return {
+			nodes,
+			ownershipEdges,
+			metadataEdges,
+		};
+	}
 
-  const companyId = company.ticker;
-  nodes.push({
-    id: companyId,
-    label: company.ticker,
-    subLabel: company.name,
-    type: 'company',
-    ticker: company.ticker,
-  });
+	const companyId = company.ticker;
 
-  if (ownership) {
-    const seenNames = new Set<string>();
+	nodes.push({
+		id: companyId,
+		label: company.ticker,
+		subLabel: company.name,
+		type: "company",
+		ticker: company.ticker,
+	});
 
-    for (const sh of ownership.holders) {
-      const nodeId = `sh-${encodeURIComponent(sh.name)}`;
-      const label = truncateName(sh.name, 30);
-      const subLabel = buildShareholderSubLabel(sh);
+	// -------------------------------------------------------------------------
+	// Shareholders
+	// -------------------------------------------------------------------------
 
-      if (!seenNames.has(sh.name)) {
-        seenNames.add(sh.name);
-        nodes.push({
-          id: nodeId,
-          label,
-          subLabel,
-          type: 'shareholder',
-          ticker: sh.symbol,
-        });
-      }
+	if (ownership) {
+		const seenShareholders = new Set<string>();
+		const seenOwnershipEdges = new Set<string>();
 
-      // Only add ownership edge for non-Public, non-Treasury holders
-      if (!isNonTraceableShareholder(sh.name)) {
-        ownershipEdges.push({
-          id: `e-${encodeURIComponent(sh.name)}-${companyId}`,
-          sourceId: nodeId,
-          targetId: companyId,
-          shareholderName: sh.name,
-          percentage: sh.sharePercentage,
-          shareAmount: sh.shareAmount,
-          sourceStatus: 'reported',
-        });
-      }
-    }
+		for (const sh of ownership.holders) {
+			if (isNonTraceableShareholder(sh.name)) {
+				continue;
+			}
 
-    // Affiliates → metadata edges (dashed, context only)
-    if (company.affiliates) {
-      for (const aff of company.affiliates) {
-        const affId = `aff-${encodeURIComponent(aff)}`;
-        nodes.push({
-          id: affId,
-          label: aff,
-          subLabel: 'Affiliate metadata · Not ownership',
-          type: 'affiliate',
-        });
-        metadataEdges.push({
-          id: `me-${encodeURIComponent(aff)}-${companyId}`,
-          sourceId: affId,
-          targetId: companyId,
-          type: 'affiliate',
-          label: 'Affiliate',
-        });
-      }
-    }
+			const nodeId = `sh-${encodeURIComponent(sh.name)}`;
 
-    // Conglomerates → metadata edges
-    if (ownership.conglomeratesGroup) {
-      for (const cg of ownership.conglomeratesGroup) {
-        const cgId = `cg-${encodeURIComponent(cg)}`;
-        nodes.push({
-          id: cgId,
-          label: cg,
-          subLabel: 'Conglomerate metadata · Not ownership',
-          type: 'conglomerate',
-        });
-        metadataEdges.push({
-          id: `me-cg-${encodeURIComponent(cg)}-${companyId}`,
-          sourceId: cgId,
-          targetId: companyId,
-          type: 'conglomerate',
-          label: 'Conglomerate group',
-        });
-      }
-    }
-  }
+			if (!seenShareholders.has(sh.name)) {
+				seenShareholders.add(sh.name);
 
-  // Management → separate nodes (no ownership edges from management)
-  if (management) {
-    for (const exec of management.keyExecutives) {
-      const nodeId = `mgmt-${encodeURIComponent(exec.name)}`;
-      nodes.push({
-        id: nodeId,
-        label: truncateName(exec.name, 25),
-        subLabel: exec.position,
-        type: 'management',
-      });
-    }
-  }
+				nodes.push({
+					id: nodeId,
+					label: truncateName(sh.name, 30),
+					subLabel: buildShareholderSubLabel(sh),
+					type: "shareholder",
+					ticker: sh.symbol,
+				});
+			}
 
-  return { nodes, ownershipEdges, metadataEdges };
+			const edgeId = `e-${encodeURIComponent(sh.name)}-${companyId}`;
+
+			if (!seenOwnershipEdges.has(edgeId)) {
+				seenOwnershipEdges.add(edgeId);
+
+				ownershipEdges.push({
+					id: edgeId,
+					sourceId: nodeId,
+					targetId: companyId,
+					shareholderName: sh.name,
+					percentage: sh.sharePercentage,
+					shareAmount: sh.shareAmount,
+					sourceStatus: "reported",
+				});
+			}
+		}
+
+		// -----------------------------------------------------------------------
+		// Affiliates
+		// -----------------------------------------------------------------------
+
+		if (company.affiliates) {
+			const seenAffiliates = new Set<string>();
+
+			for (const aff of company.affiliates) {
+				if (!aff || seenAffiliates.has(aff)) {
+					continue;
+				}
+
+				seenAffiliates.add(aff);
+
+				const affId = `aff-${encodeURIComponent(aff)}`;
+
+				nodes.push({
+					id: affId,
+					label: truncateName(aff, 30),
+					subLabel: "Affiliate metadata · Not ownership",
+					type: "affiliate",
+				});
+
+				metadataEdges.push({
+					id: `me-${encodeURIComponent(aff)}-${companyId}`,
+					sourceId: companyId,
+					targetId: affId,
+					type: "affiliate",
+					label: "Affiliate",
+				});
+			}
+		}
+
+		// -----------------------------------------------------------------------
+		// Conglomerates
+		// -----------------------------------------------------------------------
+
+		if (ownership.conglomeratesGroup) {
+			const seenConglomerates = new Set<string>();
+
+			for (const cg of ownership.conglomeratesGroup) {
+				if (!cg || seenConglomerates.has(cg)) {
+					continue;
+				}
+
+				seenConglomerates.add(cg);
+
+				const cgId = `cg-${encodeURIComponent(cg)}`;
+
+				nodes.push({
+					id: cgId,
+					label: truncateName(cg, 30),
+					subLabel: "Conglomerate metadata · Not ownership",
+					type: "conglomerate",
+				});
+
+				metadataEdges.push({
+					id: `me-cg-${encodeURIComponent(cg)}-${companyId}`,
+					sourceId: companyId,
+					targetId: cgId,
+					type: "conglomerate",
+					label: "Conglomerate group",
+				});
+			}
+		}
+	}
+
+	// -------------------------------------------------------------------------
+	// Management
+	//
+	// Management is intentionally NOT connected to the ownership graph.
+	// -------------------------------------------------------------------------
+
+	if (management) {
+		const seenManagement = new Set<string>();
+
+		for (const exec of management.keyExecutives) {
+			if (!exec.name || seenManagement.has(exec.name)) {
+				continue;
+			}
+
+			seenManagement.add(exec.name);
+
+			const nodeId = `mgmt-${encodeURIComponent(exec.name)}`;
+
+			nodes.push({
+				id: nodeId,
+				label: truncateName(exec.name, 25),
+				subLabel: exec.position,
+				type: "management",
+			});
+		}
+	}
+
+	return {
+		nodes,
+		ownershipEdges,
+		metadataEdges,
+	};
 }
 
-function buildShareholderSubLabel(sh: { name: string; symbol?: string; sharePercentage: number }): string {
-  if (sh.symbol) return `Corporate shareholder · ${sh.symbol}`;
-  if (sh.sharePercentage > 0.01) return 'Major shareholder';
-  if (sh.sharePercentage > 0) return 'Minority shareholder';
-  return 'Shareholder';
+// ---------------------------------------------------------------------------
+// Graph helpers
+// ---------------------------------------------------------------------------
+
+function buildShareholderSubLabel(sh: {
+	name: string;
+	symbol?: string;
+	sharePercentage: number;
+}): string {
+	if (sh.symbol) {
+		return `Corporate shareholder · ${sh.symbol}`;
+	}
+
+	if (sh.sharePercentage > 0.01) {
+		return "Major shareholder";
+	}
+
+	if (sh.sharePercentage > 0) {
+		return "Minority shareholder";
+	}
+
+	return "Shareholder";
 }
 
 function truncateName(name: string, maxLen: number): string {
-  if (name.length <= maxLen) return name;
-  return name.slice(0, maxLen - 1) + '…';
+	if (name.length <= maxLen) {
+		return name;
+	}
+
+	return `${name.slice(0, maxLen - 1)}…`;
 }
 
 function isNonTraceableShareholder(name: string): boolean {
-  return name === 'Public' || name === 'Treasury Stock';
+	const normalized = name.trim().toLowerCase();
+
+	return normalized === "public" || normalized === "treasury stock";
 }
 
 function formatShares(amount: number): string {
-  if (amount >= 1_000_000_000_000) return `${(amount / 1_000_000_000_000).toFixed(2)}T`;
-  if (amount >= 1_000_000_000) return `${(amount / 1_000_000_000).toFixed(2)}B`;
-  if (amount >= 1_000_000) return `${(amount / 1_000_000).toFixed(2)}M`;
-  if (amount >= 1_000) return `${(amount / 1_000).toFixed(0)}K`;
-  return amount.toLocaleString();
+	if (amount >= 1_000_000_000_000) {
+		return `${(amount / 1_000_000_000_000).toFixed(2)}T`;
+	}
+
+	if (amount >= 1_000_000_000) {
+		return `${(amount / 1_000_000_000).toFixed(2)}B`;
+	}
+
+	if (amount >= 1_000_000) {
+		return `${(amount / 1_000_000).toFixed(2)}M`;
+	}
+
+	if (amount >= 1_000) {
+		return `${(amount / 1_000).toFixed(0)}K`;
+	}
+
+	return amount.toLocaleString();
 }
 
 // ---------------------------------------------------------------------------
-// Convert to ReactFlow format
+// ELK layout
 // ---------------------------------------------------------------------------
 
-function toReactFlowNodes(graphNodes: GraphNode[]): EntityNode[] {
-  const colorMap: Record<string, EntityNodeData['dotColor']> = {
-    company: 'cyan',
-    shareholder: 'purple',
-    management: 'orange',
-    affiliate: 'green',
-    conglomerate: 'green',
-  };
+async function layoutGraph(
+	graphNodes: GraphNode[],
+	ownershipEdges: OwnershipEdgeType[],
+	metadataEdges: MetadataEdge[],
+): Promise<EntityNode[]> {
+	const topologyNodes = graphNodes.filter((node) => node.type !== "management");
 
-  return graphNodes.map((n) => ({
-    id: n.id,
-    type: 'customEntity',
-    position: { x: 0, y: 0 },
-    data: {
-      label: n.label,
-      subLabel: n.subLabel,
-      dotColor: colorMap[n.type] ?? 'gray',
-      nodeType: n.type,
-      ticker: n.ticker,
-    },
-  }));
+	const managementNodes = graphNodes.filter(
+		(node) => node.type === "management",
+	);
+
+	const topologyNodeIds = new Set(topologyNodes.map((node) => node.id));
+
+	const elkEdges = [
+		...ownershipEdges.map((edge) => ({
+			id: edge.id,
+			source: edge.sourceId,
+			target: edge.targetId,
+		})),
+
+		...metadataEdges.map((edge) => ({
+			id: edge.id,
+			source: edge.sourceId,
+			target: edge.targetId,
+		})),
+	].filter(
+		(edge) =>
+			topologyNodeIds.has(edge.source) && topologyNodeIds.has(edge.target),
+	);
+
+	const elkGraph = {
+		id: "tracepoint-root",
+
+		layoutOptions: elkLayoutOptions,
+
+		children: topologyNodes.map((node) => ({
+			id: node.id,
+			width: NODE_WIDTH,
+			height: NODE_HEIGHT,
+		})),
+
+		edges: elkEdges.map((edge) => ({
+			id: edge.id,
+			sources: [edge.source],
+			targets: [edge.target],
+		})),
+	};
+
+	const result = await elk.layout(elkGraph);
+
+	const positions = new Map<
+		string,
+		{
+			x: number;
+			y: number;
+		}
+	>();
+
+	for (const child of result.children ?? []) {
+		positions.set(child.id, {
+			x: child.x ?? 0,
+			y: child.y ?? 0,
+		});
+	}
+
+	// -------------------------------------------------------------------------
+	// Management gets its own row below the graph.
+	// -------------------------------------------------------------------------
+
+	if (managementNodes.length > 0) {
+		const topologyPositions = Array.from(positions.values());
+
+		const maxY =
+			topologyPositions.length > 0
+				? Math.max(
+						...topologyPositions.map((position) => position.y + NODE_HEIGHT),
+					)
+				: 0;
+
+		const companyNode = topologyNodes.find((node) => node.type === "company");
+
+		const companyPosition = companyNode
+			? positions.get(companyNode.id)
+			: undefined;
+
+		const companyCenterX = companyPosition
+			? companyPosition.x + NODE_WIDTH / 2
+			: NODE_WIDTH / 2;
+
+		const managementGap = 180;
+		const managementGapX = 24;
+
+		const managementWidth =
+			managementNodes.length * NODE_WIDTH +
+			Math.max(0, managementNodes.length - 1) * managementGapX;
+
+		const managementStartX = companyCenterX - managementWidth / 2;
+
+		const managementY = maxY + managementGap;
+
+		managementNodes.forEach((node, index) => {
+			positions.set(node.id, {
+				x: managementStartX + index * (NODE_WIDTH + managementGapX),
+				y: managementY,
+			});
+		});
+	}
+
+	return graphNodes.map((node) => {
+		const position = positions.get(node.id) ?? {
+			x: 0,
+			y: 0,
+		};
+
+		return {
+			id: node.id,
+			type: "customEntity",
+			position,
+			data: {
+				label: node.label,
+				subLabel: node.subLabel,
+				dotColor: getNodeColor(node.type),
+				nodeType: node.type,
+				ticker: node.ticker,
+			},
+			draggable: false,
+			selectable: true,
+		};
+	});
 }
+
+function getNodeColor(type: GraphNode["type"]): EntityNodeData["dotColor"] {
+	switch (type) {
+		case "company":
+			return "cyan";
+
+		case "shareholder":
+			return "purple";
+
+		case "management":
+			return "orange";
+
+		case "affiliate":
+		case "conglomerate":
+			return "green";
+
+		default:
+			return "gray";
+	}
+}
+
+// ---------------------------------------------------------------------------
+// ReactFlow edges
+// ---------------------------------------------------------------------------
 
 function toReactFlowEdges(
-  ownershipEdges: OwnershipEdgeType[],
-  metadataEdges: MetadataEdge[],
-  selectedShareholderId: string | null,
+	ownershipEdges: OwnershipEdgeType[],
+	metadataEdges: MetadataEdge[],
+	selectedNodeId: string | null,
 ): Edge[] {
-  const edges: Edge[] = [];
+	const edges: Edge[] = [];
 
-  for (const e of ownershipEdges) {
-    const lineColor = selectedShareholderId ? '#a87ffb' : '#00c3d9';
+	for (const edge of ownershipEdges) {
+		const isSelected =
+			selectedNodeId === edge.sourceId || selectedNodeId === edge.targetId;
 
-    edges.push({
-      id: e.id,
-      source: e.sourceId,
-      target: e.targetId,
-      label: buildEdgeLabel(e),
-      labelStyle: { fill: '#fff', fontWeight: 600, fontSize: 11 },
-      labelBgStyle: { fill: '#0c1824', color: '#fff' },
-      labelBgPadding: [8, 4] as [number, number],
-      labelBgBorderRadius: 4,
-      style: {
-        stroke: lineColor,
-        strokeWidth: 2,
-      },
-    });
-  }
+		edges.push({
+			id: edge.id,
+			source: edge.sourceId,
+			target: edge.targetId,
+			type: "smoothstep",
 
-  for (const e of metadataEdges) {
-    edges.push({
-      id: e.id,
-      source: e.sourceId,
-      target: e.targetId,
-      animated: true,
-      style: {
-        stroke: '#4ade80',
-        strokeWidth: 2,
-        strokeDasharray: '4 4',
-      },
-    });
-  }
+			label: buildEdgeLabel(edge),
 
-  return edges;
+			labelStyle: {
+				fill: "#070A25",
+				fontWeight: 600,
+				fontSize: 11,
+			},
+
+			labelBgStyle: {
+				fill: "#F8F8FF",
+				color: "#070A25",
+			},
+
+			labelBgPadding: [8, 4],
+
+			labelBgBorderRadius: 4,
+
+			style: {
+				stroke: isSelected ? "#CBFF2E" : "#070A25",
+				strokeWidth: isSelected ? 2.5 : 1.75,
+			},
+		});
+	}
+
+	for (const edge of metadataEdges) {
+		const isSelected =
+			selectedNodeId === edge.sourceId || selectedNodeId === edge.targetId;
+
+		edges.push({
+			id: edge.id,
+			source: edge.sourceId,
+			target: edge.targetId,
+			type: "smoothstep",
+			animated: false,
+
+			style: {
+				stroke: isSelected ? "#CBFF2E" : "#16a34a",
+				strokeWidth: isSelected ? 2.5 : 1.5,
+				strokeDasharray: "6 5",
+			},
+		});
+	}
+
+	return edges;
 }
 
 function buildEdgeLabel(edge: OwnershipEdgeType): string {
-  if (edge.percentage === null || edge.percentage === undefined) {
-    return 'Not available';
-  }
-  const pct = `${(edge.percentage * 100).toFixed(3)}%`;
-  if (edge.shareAmount !== null && edge.shareAmount !== undefined) {
-    const shares = formatShares(edge.shareAmount);
-    return `${pct}\n${shares}`;
-  }
-  return pct;
+	if (edge.percentage === null || edge.percentage === undefined) {
+		return "Not available";
+	}
+
+	const pct = `${(edge.percentage * 100).toFixed(3)}%`;
+
+	if (edge.shareAmount !== null && edge.shareAmount !== undefined) {
+		return `${pct}\n${formatShares(edge.shareAmount)}`;
+	}
+
+	return pct;
 }
 
 // ---------------------------------------------------------------------------
@@ -340,463 +659,626 @@ function buildEdgeLabel(edge: OwnershipEdgeType): string {
 // ---------------------------------------------------------------------------
 
 export default function Trace() {
-  const [searchParams] = useSearchParams();
-  const tickerParam = searchParams.get('ticker');
-  const ticker = tickerParam
-    ? tickerParam.toUpperCase().replace(/\.JK$/, '') + '.JK'
-    : 'BBCA.JK';
+	const [searchParams] = useSearchParams();
+	const navigate = useNavigate();
 
-  const [selectedNode, setSelectedNode] = useState<string | null>(null);
+	const tickerParam = searchParams.get("ticker");
 
-  const [company, setCompany] = useState<PanelState<TracePointCompany>>(
-    createPanelState(),
-  );
-  const [ownership, setOwnership] = useState<PanelState<TracePointOwnershipSnapshot>>(
-    createPanelState(),
-  );
-  const [management, setManagement] = useState<PanelState<TracePointManagement>>(
-    createPanelState(),
-  );
-  const [freeFloat, setFreeFloat] = useState<PanelState<TracePointFreeFloat>>(
-    createPanelState(),
-  );
-  const [composition, setComposition] = useState<PanelState<TracePointComposition>>(
-    createPanelState(),
-  );
-  const [corporateActions, setCorporateActions] = useState<PanelState<TracePointCorporateActions>>(
-    createPanelState(),
-  );
+	const ticker = tickerParam
+		? `${tickerParam.toUpperCase().replace(/\.JK$/, "")}.JK`
+		: "BBCA.JK";
 
-  // Data loading — fetch once per ticker change
-  const fetchCompanyData = useCallback(async () => {
-    const [companyResult, ownershipResult, managementResult] = await Promise.allSettled([
-      getCompanyOverview(ticker),
-      getCompanyOwnership(ticker),
-      getCompanyManagement(ticker),
-    ]);
+	const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
-    if (companyResult.status === 'fulfilled') {
-      setCompany({ status: 'success', data: companyResult.value, error: null });
-    } else {
-      setCompany({ status: 'error', data: null, error: (companyResult.reason as Error).message });
-    }
+	const [company, setCompany] =
+		useState<PanelState<TracePointCompany>>(createPanelState());
 
-    if (ownershipResult.status === 'fulfilled') {
-      setOwnership({ status: 'success', data: ownershipResult.value, error: null });
-    } else {
-      setOwnership({ status: 'error', data: null, error: (ownershipResult.reason as Error).message });
-    }
+	const [ownership, setOwnership] =
+		useState<PanelState<TracePointOwnershipSnapshot>>(createPanelState());
 
-    if (managementResult.status === 'fulfilled') {
-      setManagement({ status: 'success', data: managementResult.value, error: null });
-    } else {
-      setManagement({ status: 'error', data: null, error: (managementResult.reason as Error).message });
-    }
+	const [management, setManagement] =
+		useState<PanelState<TracePointManagement>>(createPanelState());
 
-    const secondary = await Promise.allSettled([
-      getFreeFloat(ticker),
-      getShareholderComposition(ticker),
-      getCorporateActions(ticker),
-    ]);
+	const [freeFloat, setFreeFloat] =
+		useState<PanelState<TracePointFreeFloat>>(createPanelState());
 
-    for (const result of secondary) {
-      if (result.status === 'fulfilled') {
-        const data = result.value as unknown;
-        if (data && typeof data === 'object') {
-          const d = data as Record<string, unknown>;
-          if ('ticker' in d) {
-            const tickerVal = d.ticker as string;
-            if (tickerVal === ticker && 'freeFloat' in d) {
-              setFreeFloat({ status: 'success', data: d as unknown as TracePointFreeFloat, error: null });
-            } else if ('latestSnapshot' in d) {
-              setComposition({ status: 'success', data: d as unknown as TracePointComposition, error: null });
-            } else if ('dividends' in d || 'stockSplits' in d) {
-              setCorporateActions({ status: 'success', data: d as unknown as TracePointCorporateActions, error: null });
-            }
-          }
-        }
-      }
-    }
-  }, [ticker]);
+	const [composition, setComposition] =
+		useState<PanelState<TracePointComposition>>(createPanelState());
 
-  useEffect(() => {
-    (async () => {
-      await fetchCompanyData();
-    })();
-  }, [fetchCompanyData]);
+	const [, setCorporateActions] =
+		useState<PanelState<TracePointCorporateActions>>(createPanelState());
 
-  // All useMemo calls unconditionally — no conditionals
-  const graphData = useMemo(() => {
-    const companyData = company.status === 'success' ? company.data : null;
-    const ownershipData = ownership.status === 'success' ? ownership.data : null;
-    const managementData = management.status === 'success' ? management.data : null;
-    return buildGraphData(companyData, ownershipData, managementData);
-  }, [company.status, company.data, ownership.status, ownership.data, management.status, management.data]);
+	const [reactFlowNodes, setReactFlowNodes] = useState<EntityNode[]>([]);
 
-  const reactFlowNodes = useMemo(() => toReactFlowNodes(graphData.nodes), [graphData.nodes]);
-  const reactFlowEdges = useMemo(
-    () => toReactFlowEdges(graphData.ownershipEdges, graphData.metadataEdges, selectedNode),
-    [graphData.ownershipEdges, graphData.metadataEdges, selectedNode],
-  );
+	const shareholderParam = searchParams.get("shareholder");
+	const initialTickerParam = searchParams.get("ticker");
 
-  const onNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
-    setSelectedNode(node.id);
-  }, []);
+	const [traceCandidates, setTraceCandidates] = useState<TraceCandidate[]>([]);
+	const [traceLoading, setTraceLoading] = useState(false);
 
-  const onPaneClick = useCallback(() => {
-    setSelectedNode(null);
-  }, []);
+	// -------------------------------------------------------------------------
+	// Fetch
+	// -------------------------------------------------------------------------
 
-  const totalOwnershipPct = useMemo(() => {
-    if (!ownership.data) return null;
-    let total = 0;
-    for (const sh of ownership.data.holders) {
-      total += sh.sharePercentage;
-    }
-    return total;
-  }, [ownership.data]);
+	const fetchCompanyData = useCallback(async () => {
+		setCompany(createPanelState());
+		setOwnership(createPanelState());
+		setManagement(createPanelState());
+		setFreeFloat(createPanelState());
+		setComposition(createPanelState());
+		setCorporateActions(createPanelState());
 
-  const freeFloatPct = freeFloat.status === 'success' && freeFloat.data
-    ? `${(freeFloat.data.freeFloat * 100).toFixed(3)}%`
-    : null;
+		setSelectedNode(null);
 
-  const latestComp = composition.status === 'success' && composition.data
-    ? composition.data.latestSnapshot
-    : null;
+		const [companyResult, ownershipResult, managementResult] =
+			await Promise.allSettled([
+				getCompanyOverview(ticker),
+				getCompanyOwnership(ticker),
+				getCompanyManagement(ticker),
+			]);
 
-  return (
-    <div className="flex h-screen overflow-hidden bg-[#080d14] font-sans text-white">
-      <aside className="z-20 flex w-14 flex-col items-center border-r border-[#1d3245] bg-[#0c1824] py-4">
-        <div className="mb-8 flex h-8 w-8 items-center justify-center rounded-full bg-[#00c3d9]">
-          <div className="h-3 w-3 rounded-full bg-[#080d14]" />
-        </div>
+		if (companyResult.status === "fulfilled") {
+			setCompany({
+				status: "success",
+				data: companyResult.value,
+				error: null,
+			});
+		} else {
+			setCompany({
+				status: "error",
+				data: null,
+				error:
+					companyResult.reason instanceof Error
+						? companyResult.reason.message
+						: String(companyResult.reason),
+			});
+		}
 
-        <nav className="flex flex-1 flex-col gap-6">
-          <button type="button" className="text-gray-500 transition hover:text-white">
-            <Search size={20} />
-          </button>
-          <button
-            type="button"
-            className={`rounded-lg p-2 transition-colors ${
-              selectedNode
-                ? 'rounded-lg bg-[#122a3d] p-2 text-[#a87ffb]'
-                : 'text-gray-500 hover:text-white'
-            }`}
-          >
-            <User size={20} />
-          </button>
-          <button type="button" className="text-gray-500 transition hover:text-white">
-            <LineChart size={20} />
-          </button>
-          <button type="button" className="text-gray-500 transition hover:text-white">
-            <GitBranch size={20} />
-          </button>
-        </nav>
+		if (ownershipResult.status === "fulfilled") {
+			setOwnership({
+				status: "success",
+				data: ownershipResult.value,
+				error: null,
+			});
+		} else {
+			setOwnership({
+				status: "error",
+				data: null,
+				error:
+					ownershipResult.reason instanceof Error
+						? ownershipResult.reason.message
+						: String(ownershipResult.reason),
+			});
+		}
 
-        <button type="button" className="mt-auto text-gray-500 transition hover:text-white">
-          <AlertCircle size={20} />
-        </button>
-      </aside>
+		if (managementResult.status === "fulfilled") {
+			setManagement({
+				status: "success",
+				data: managementResult.value,
+				error: null,
+			});
+		} else {
+			setManagement({
+				status: "error",
+				data: null,
+				error:
+					managementResult.reason instanceof Error
+						? managementResult.reason.message
+						: String(managementResult.reason),
+			});
+		}
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-[#1d3245] bg-[#0c1824] px-6">
-          <div>
-            <div className="mb-0.5 text-[10px] uppercase tracking-wider text-gray-400">
-              Investigation
-            </div>
-            <div className="flex items-baseline gap-2">
-              <h1 className="text-lg font-bold">{ticker}</h1>
-              <span className="text-sm text-gray-400">
-                {company.status === 'success' && company.data
-                  ? company.data.name
-                  : company.status === 'loading'
-                  ? 'Loading...'
-                  : 'Error loading company'}
-              </span>
-            </div>
-          </div>
+		const [freeFloatResult, compositionResult, corporateActionsResult] =
+			await Promise.allSettled([
+				getFreeFloat(ticker),
+				getShareholderComposition(ticker),
+				getCorporateActions(ticker),
+			]);
 
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <Search size={16} className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-              <input
-                type="text"
-                placeholder="Search ticker or company"
-                className="w-72 rounded-full border border-[#1d3245] bg-[#080d14] py-1.5 pl-10 pr-12 text-sm text-white placeholder-gray-500 focus:border-[#00c3d9] focus:outline-none"
-              />
-            </div>
+		if (freeFloatResult.status === "fulfilled") {
+			setFreeFloat({
+				status: "success",
+				data: freeFloatResult.value,
+				error: null,
+			});
+		} else {
+			setFreeFloat({
+				status: "error",
+				data: null,
+				error:
+					freeFloatResult.reason instanceof Error
+						? freeFloatResult.reason.message
+						: String(freeFloatResult.reason),
+			});
+		}
 
-            <div className="flex items-center gap-2 rounded-full border border-[#1d3245] bg-[#0c1824] px-3 py-1.5 text-xs">
-              <div className="h-2 w-2 rounded-full bg-[#00c3d9]" />
-              Sectors API v2
-            </div>
-          </div>
-        </header>
+		if (compositionResult.status === "fulfilled") {
+			setComposition({
+				status: "success",
+				data: compositionResult.value,
+				error: null,
+			});
+		} else {
+			setComposition({
+				status: "error",
+				data: null,
+				error:
+					compositionResult.reason instanceof Error
+						? compositionResult.reason.message
+						: String(compositionResult.reason),
+			});
+		}
 
-        <main className="flex min-h-0 flex-1 gap-6 overflow-hidden p-6">
-          <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-[#1d3245] bg-[#0c1824]">
-            <div className="pointer-events-none absolute left-4 right-4 top-4 z-10 flex items-center justify-between">
-              <div className="pointer-events-auto flex rounded-full border border-[#1d3245] bg-[#080d14] p-1">
-                <button
-                  type="button"
-                  className={`rounded-full px-4 py-1 text-sm font-medium transition-colors ${
-                    selectedNode
-                      ? 'bg-[#122a3d] text-white'
-                      : 'bg-[#122a3d] px-4 py-1 text-sm font-medium text-white'
-                  }`}
-                >
-                  Graph
-                </button>
-                <button
-                  type="button"
-                  className="rounded-full px-4 py-1 text-sm text-gray-400 hover:text-white"
-                >
-                  Context
-                </button>
-              </div>
+		if (corporateActionsResult.status === "fulfilled") {
+			setCorporateActions({
+				status: "success",
+				data: corporateActionsResult.value,
+				error: null,
+			});
+		} else {
+			setCorporateActions({
+				status: "error",
+				data: null,
+				error:
+					corporateActionsResult.reason instanceof Error
+						? corporateActionsResult.reason.message
+						: String(corporateActionsResult.reason),
+			});
+		}
+	}, [ticker]);
 
-              <div className="pointer-events-auto flex gap-2">
-                <button type="button" className="rounded-full border border-[#1d3245] bg-[#080d14] px-4 py-1.5 text-sm text-gray-300">
-                  - 100%
-                </button>
-                <button type="button" className="rounded-full border border-[#1d3245] bg-[#080d14] px-4 py-1.5 text-sm text-gray-300">
-                  Fit graph
-                </button>
-              </div>
-            </div>
+	// Fetch company data when ticker changes
+	// eslint-disable-next-line react-hooks/set-state-in-effect -- resetting panel states before async fetch is intentional
+	useEffect(() => { fetchCompanyData(); }, [fetchCompanyData]);
 
-            <div className="pointer-events-none absolute left-6 top-20 z-10 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
-              OWNERSHIP MAP
-            </div>
+	// Fetch trace candidates when shareholder param is present
+	useEffect(() => {
+		if (shareholderParam && initialTickerParam) {
+			// eslint-disable-next-line react-hooks/set-state-in-effect -- setLoading(true) before async fetch is intentional
+			setTraceLoading(true);
+			searchByShareholderName(shareholderParam, 20)
+				.then((result) => {
+					const candidates: TraceCandidate[] = result.results.map((r) => ({
+						ticker: r.ticker,
+						companyName: r.companyName,
+						screenerName: shareholderParam,
+					}));
+					setTraceCandidates(candidates);
+					setTraceLoading(false);
+				})
+				.catch(() => {
+					setTraceCandidates([]);
+					setTraceLoading(false);
+				});
+		}
+	}, [shareholderParam, initialTickerParam]);
 
-            <div className="pointer-events-none absolute right-6 top-20 z-10">
-              <div className="flex items-center gap-2 rounded-full border border-[#1d3245] bg-[#0c1824] px-3 py-1.5 text-xs text-gray-300">
-                <div className="h-2 w-2 rounded-full bg-[#4ade80]" />
-                Live response
-              </div>
-            </div>
+	// -------------------------------------------------------------------------
+	// Graph data
+	// -------------------------------------------------------------------------
 
-            <div className="min-h-0 flex-1">
-              <ReactFlow
-                nodes={reactFlowNodes}
-                edges={reactFlowEdges}
-                onNodesChange={() => {}}
-                onEdgesChange={() => {}}
-                onNodeClick={onNodeClick}
-                onPaneClick={onPaneClick}
-                nodeTypes={nodeTypes}
-                fitView
-                className="bg-[#080d14]"
-                snapToGrid
-                snapGrid={[15, 15]}
-              >
-                <Background color="#1d3245" gap={24} />
-              </ReactFlow>
-            </div>
+	const graphData = useMemo(() => {
+		const companyData = company.status === "success" ? company.data : null;
 
-            <div className="pointer-events-none absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-4">
-              <div className="flex items-center gap-2 rounded-full border border-[#1d3245] bg-[#0c1824] px-4 py-2 text-xs text-gray-300">
-                <div className="h-0.5 w-4 bg-[#00c3d9]" />
-                Reported ownership
-              </div>
-              <div className="flex items-center gap-2 rounded-full border border-[#1d3245] bg-[#0c1824] px-4 py-2 text-xs text-gray-300">
-                <div className="h-0 w-4 border-t-2 border-dashed border-[#4ade80]" />
-                Context metadata
-              </div>
-              <div className="flex items-center gap-2 rounded-full border border-[#1d3245] bg-[#0c1824] px-4 py-2 text-xs text-[#a87ffb]">
-                <div className="h-2 w-2 rounded-full bg-[#a87ffb]" />
-                Selected node
-              </div>
-            </div>
-          </div>
+		const ownershipData =
+			ownership.status === "success" ? ownership.data : null;
 
-          <div className="flex w-[420px] shrink-0 flex-col overflow-hidden rounded-xl border border-[#1d3245] bg-[#0c1824]">
-            {selectedNode ? (
-              <SelectedNodeDetail
-                nodeId={selectedNode}
-                graphNodes={graphData.nodes}
-                ownershipData={ownership.status === 'success' ? ownership.data : null}
-                companyData={company.status === 'success' ? company.data : null}
-              />
-            ) : (
-              <div className="flex-1 overflow-y-auto p-6">
-                <h2 className="mb-1 text-xl font-bold text-white">
-                  {ticker} ownership context
-                </h2>
-                <p className="mb-6 text-sm text-gray-400">
-                  Latest available snapshot · Live from Sectors API
-                </p>
+		const managementData =
+			management.status === "success" ? management.data : null;
 
-                <div className="mb-6 grid grid-cols-2 gap-4">
-                  <div className="rounded-xl border border-[#1d3245] bg-[#080d14] p-4">
-                    <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                      FREE FLOAT
-                    </div>
-                    <div className="mb-1 text-2xl font-bold text-white">
-                      {freeFloatPct || (
-                        <span className="text-gray-500">
-                          {freeFloat.status === 'loading' ? '...' : 'Not available'}
-                        </span>
-                      )}
-                    </div>
-                    {freeFloat.status === 'success' && freeFloat.data && (
-                      <div className="text-xs text-[#00c3d9]">From Sectors endpoint</div>
-                    )}
-                  </div>
+		return buildGraphData(companyData, ownershipData, managementData);
+	}, [
+		company.status,
+		company.data,
+		ownership.status,
+		ownership.data,
+		management.status,
+		management.data,
+	]);
 
-                  <div className="rounded-xl border border-[#1d3245] bg-[#080d14] p-4">
-                    <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                      SHAREHOLDERS
-                    </div>
-                    <div className="mb-1 text-2xl font-bold text-white">
-                      {ownership.status === 'success' && ownership.data
-                        ? `${ownership.data.holders.length}`
-                        : ownership.status === 'loading'
-                        ? '...'
-                        : 'Not available'}
-                    </div>
-                    {latestComp && (
-                      <div className="text-xs text-[#4ade80]">
-                        +{latestComp.changeInShareholders.toLocaleString()} vs prior month
-                      </div>
-                    )}
-                  </div>
-                </div>
+	// -------------------------------------------------------------------------
+	// ELK layout
+	// -------------------------------------------------------------------------
 
-                {ownership.status === 'success' && ownership.data && (
-                  <div className="mb-6 rounded-xl border border-[#1d3245] bg-[#080d14] p-4">
-                    <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                      TOTAL REPORTED OWNERSHIP
-                    </div>
-                    <div className="text-2xl font-bold text-white">
-                      {totalOwnershipPct !== null
-                        ? `${(totalOwnershipPct * 100).toFixed(2)}%`
-                        : 'Not available'}
-                    </div>
-                    <p className="text-xs text-gray-400 mt-1">
-                      Sum of reported major shareholders. Remaining is public/free float.
-                    </p>
-                  </div>
-                )}
+	useEffect(() => {
+		let cancelled = false;
 
-                {latestComp && (
-                  <div className="mb-6 rounded-xl border border-[#1d3245] bg-[#080d14] p-5">
-                    <div className="mb-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                      LOCAL / FOREIGN COMPOSITION
-                    </div>
-                    <div className="mb-4">
-                      <div className="mb-2 flex justify-between text-sm text-gray-300">
-                        <span>Local</span>
-                        <span>
-                          {((latestComp.local.total / latestComp.sharesNumber) * 100).toFixed(2)}%
-                        </span>
-                      </div>
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-[#122a3d]">
-                        <div
-                          className="h-full bg-[#00c3d9]"
-                          style={{
-                            width: `${(latestComp.local.total / latestComp.sharesNumber) * 100}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="mb-2 flex justify-between text-sm text-gray-300">
-                        <span>Foreign</span>
-                        <span>
-                          {((latestComp.foreign.total / latestComp.sharesNumber) * 100).toFixed(2)}%
-                        </span>
-                      </div>
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-[#122a3d]">
-                        <div
-                          className="h-full bg-[#a87ffb]"
-                          style={{
-                            width: `${(latestComp.foreign.total / latestComp.sharesNumber) * 100}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
+		async function applyLayout() {
+			if (graphData.nodes.length === 0) {
+				setReactFlowNodes([]);
+				return;
+			}
 
-                {corporateActions.status === 'success' && corporateActions.data && (
-                  <div className="mb-6">
-                    <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                      CORPORATE ACTIONS
-                    </div>
-                    <div className="space-y-3">
-                      {corporateActions.data.dividends?.slice(0, 3).map((d, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center justify-between rounded-xl border border-[#1d3245] bg-[#080d14] p-4"
-                        >
-                          <div className="flex items-center gap-4">
-                            <span className="rounded bg-[#0d2232] px-2 py-1 text-xs font-medium text-[#00c3d9]">
-                              Dividend
-                            </span>
-                            <span className="font-bold text-white">
-                              Ex-date {formatDate(d.exDate)}
-                            </span>
-                          </div>
-                          <span className="font-bold text-white">IDR {d.dividendAmount}</span>
-                        </div>
-                      ))}
-                      {corporateActions.data.stockSplits?.map((s, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center justify-between rounded-xl border border-[#1d3245] bg-[#080d14] p-4"
-                        >
-                          <div className="flex items-center gap-4">
-                            <span className="rounded bg-[#1c221a] px-2 py-1 text-xs font-medium text-[#f5a623]">
-                              Split
-                            </span>
-                            <span className="font-bold text-white">{formatDate(s.date)}</span>
-                          </div>
-                          <span className="font-bold text-white">
-                            1 : {s.splitRatio}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+			try {
+				const layoutedNodes = await layoutGraph(
+					graphData.nodes,
+					graphData.ownershipEdges,
+					graphData.metadataEdges,
+				);
 
-                <div className="rounded-xl border border-[#1d3245] bg-[#080d14] p-5">
-                  <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-[#00c3d9]">
-                    DATA STATUS
-                  </div>
-                  <div className="mb-1 text-lg font-bold text-white">
-                    Reported by Sectors
-                  </div>
-                  {ownership.status === 'success' && ownership.data && (
-                    <div className="mt-3 text-xs text-gray-400">
-                      {ownership.data.whaleInvestors && ownership.data.whaleInvestors.length > 0
-                        ? `Whale investors: ${ownership.data.whaleInvestors.join(', ')}`
-                        : 'Whale investors: Not available'}
-                      {ownership.data.conglomeratesGroup &&
-                        ownership.data.conglomeratesGroup.length > 0 && (
-                          <span className="block mt-1">
-                            Conglomerate groups: {ownership.data.conglomeratesGroup.join(', ')}
-                          </span>
-                        )}
-                      <span className="block mt-2 text-[#f5a623]">
-                        Ownership date: Not available
-                      </span>
-                    </div>
-                  )}
-                  {ownership.status === 'error' && (
-                    <div className="mt-2 text-xs text-[#f5a623]">
-                      {ownership.error || 'Failed to load ownership data'}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </main>
-      </div>
-    </div>
-  );
+				if (!cancelled) {
+					setReactFlowNodes(layoutedNodes);
+				}
+			} catch (error) {
+				console.error("Failed to layout ownership graph:", error);
+
+				if (!cancelled) {
+					setReactFlowNodes(
+						graphData.nodes.map((node) => ({
+							id: node.id,
+							type: "customEntity",
+							position: {
+								x: 0,
+								y: 0,
+							},
+							data: {
+								label: node.label,
+								subLabel: node.subLabel,
+								dotColor: getNodeColor(node.type),
+								nodeType: node.type,
+								ticker: node.ticker,
+							},
+							draggable: false,
+							selectable: true,
+						})),
+					);
+				}
+			}
+		}
+
+		void applyLayout();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [graphData.nodes, graphData.ownershipEdges, graphData.metadataEdges]);
+
+	// -------------------------------------------------------------------------
+	// Edges
+	// -------------------------------------------------------------------------
+
+	const reactFlowEdges = useMemo(
+		() =>
+			toReactFlowEdges(
+				graphData.ownershipEdges,
+				graphData.metadataEdges,
+				selectedNode,
+			),
+		[graphData.ownershipEdges, graphData.metadataEdges, selectedNode],
+	);
+
+	// -------------------------------------------------------------------------
+	// Interaction
+	// -------------------------------------------------------------------------
+
+	const onNodeClick = useCallback((_event: MouseEvent, node: Node) => {
+		setSelectedNode(node.id);
+	}, []);
+
+	const onPaneClick = useCallback(() => {
+		setSelectedNode(null);
+	}, []);
+
+	// -------------------------------------------------------------------------
+	// Derived data
+	// -------------------------------------------------------------------------
+
+	const totalOwnershipPct = useMemo(() => {
+		if (!ownership.data) {
+			return null;
+		}
+
+		let total = 0;
+
+		for (const sh of ownership.data.holders) {
+			if (isNonTraceableShareholder(sh.name)) {
+				continue;
+			}
+
+			total += sh.sharePercentage;
+		}
+
+		return total;
+	}, [ownership.data]);
+
+	const freeFloatPct =
+		freeFloat.status === "success" && freeFloat.data
+			? `${(freeFloat.data.freeFloat * 100).toFixed(3)}%`
+			: null;
+
+	const latestComp =
+		composition.status === "success" && composition.data
+			? composition.data.latestSnapshot
+			: null;
+
+	// -------------------------------------------------------------------------
+	// Render
+	// -------------------------------------------------------------------------
+
+	return (
+		<div className="flex h-screen overflow-hidden bg-[var(--color-surface)] font-sans text-[var(--color-primary)]">
+			<aside className="z-20 flex w-14 flex-col items-center border-r border-[var(--color-border)] bg-white py-4">
+				<div className="mb-8 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-accent)]">
+					<div className="h-3 w-3 rounded-full bg-[var(--color-primary)]" />
+				</div>
+
+				<nav className="flex flex-1 flex-col gap-6">
+					<button
+						type="button"
+						onClick={() => navigate("/search")}
+						className="text-[var(--color-muted)] transition hover:text-[var(--color-primary)]"
+						title="Back to search"
+						aria-label="Back to search"
+					>
+						<Search size={20} />
+					</button>
+
+					<button
+						type="button"
+						className={`rounded-[var(--radius-sm)] p-2 transition-colors ${
+							selectedNode
+								? "bg-[var(--color-accent)]/20 text-[var(--color-accent)]"
+								: "text-[var(--color-muted)] hover:text-[var(--color-primary)]"
+						}`}
+						onClick={() => {
+							if (selectedNode) {
+								setSelectedNode(null);
+							}
+						}}
+						title="Clear selection"
+						aria-label="Clear selection"
+					>
+						<User size={20} />
+					</button>
+				</nav>
+			</aside>
+
+			<div className="flex min-w-0 flex-1 flex-col">
+				<header className="flex h-16 shrink-0 items-center justify-between border-b border-[var(--color-border)] bg-white px-6">
+					<div>
+						<div className="mb-0.5 text-[10px] uppercase tracking-wider text-[var(--color-muted)]">
+							Investigation
+						</div>
+
+						<div className="flex items-baseline gap-2">
+							<h1 className="text-lg font-bold">{ticker}</h1>
+
+							<span className="text-sm text-[var(--color-muted)]">
+								{company.status === "success" && company.data
+									? company.data.name
+									: company.status === "loading"
+										? "Loading..."
+										: "Error loading company"}
+							</span>
+						</div>
+					</div>
+
+					<div className="flex items-center gap-4">
+						<div className="relative">
+							<Search
+								size={16}
+								className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-muted)]"
+							/>
+
+							<input
+								type="text"
+								readOnly
+								value={ticker}
+								className="w-48 cursor-not-allowed rounded-full border border-[var(--color-border)] bg-white py-1.5 pl-10 pr-12 text-sm text-[var(--color-primary)]"
+								aria-label={`Current ticker: ${ticker}`}
+							/>
+						</div>
+
+						<div className="flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-3 py-1.5 text-xs text-[var(--color-muted)]">
+							<div className="h-2 w-2 rounded-full bg-green-500" />
+							Live response
+						</div>
+					</div>
+				</header>
+
+				<main className="flex min-h-0 flex-1 gap-6 overflow-hidden p-6">
+					<div className="relative flex min-w-0 flex-1 flex-col overflow-hidden rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white">
+						<div className="pointer-events-none absolute left-6 top-4 z-10 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-muted)]">
+							OWNERSHIP MAP
+						</div>
+
+						<div className="pointer-events-none absolute right-6 top-4 z-10">
+							<div className="flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-3 py-1.5 text-xs text-[var(--color-muted)]">
+								<div className="h-2 w-2 rounded-full bg-green-500" />
+								Live response
+							</div>
+						</div>
+
+						<div className="min-h-0 flex-1">
+							<ReactFlow
+								nodes={reactFlowNodes}
+								edges={reactFlowEdges}
+								onNodeClick={onNodeClick}
+								onPaneClick={onPaneClick}
+								nodeTypes={nodeTypes}
+								fitView
+								fitViewOptions={{
+									padding: 0.25,
+									minZoom: 0.35,
+									maxZoom: 1.2,
+								}}
+								defaultEdgeOptions={{
+									type: "smoothstep",
+								}}
+								className="bg-[var(--color-surface)]"
+							>
+								<Background color="#d1d5db" gap={24} size={1} />
+							</ReactFlow>
+						</div>
+
+						<div className="pointer-events-none absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-4">
+							<div className="flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-4 py-2 text-xs text-[var(--color-muted)]">
+								<div className="h-0.5 w-4 bg-[var(--color-primary)]" />
+								Reported ownership
+							</div>
+
+							<div className="flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-4 py-2 text-xs text-[var(--color-muted)]">
+								<div className="h-0 w-4 border-t-2 border-dashed border-green-500" />
+								Context metadata
+							</div>
+						</div>
+					</div>
+
+					<div className="flex w-[420px] shrink-0 flex-col overflow-hidden rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white">
+						{selectedNode ? (
+							<SelectedNodeDetail
+								nodeId={selectedNode}
+								graphNodes={graphData.nodes}
+								ownershipData={
+									ownership.status === "success" ? ownership.data : null
+								}
+								companyData={company.status === "success" ? company.data : null}
+							/>
+						) : (
+							<div className="flex-1 overflow-y-auto p-6">
+								<h2 className="mb-1 text-xl font-bold text-[var(--color-primary)]">
+									{ticker} ownership context
+								</h2>
+
+								<p className="mb-6 text-sm text-[var(--color-muted)]">
+									Latest available snapshot · Live from Sectors API
+								</p>
+
+								<div className="mb-6 grid grid-cols-2 gap-4">
+									<div className="rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-gray-50 p-4">
+										<div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)]">
+											FREE FLOAT
+										</div>
+
+										<div className="mb-1 text-2xl font-bold text-[var(--color-primary)]">
+											{freeFloatPct || (
+												<span className="text-[var(--color-muted)]">
+													{freeFloat.status === "loading"
+														? "..."
+														: "Not available"}
+												</span>
+											)}
+										</div>
+
+										{freeFloat.status === "success" && freeFloat.data && (
+											<div className="text-xs text-[var(--color-primary)]">
+												From Sectors endpoint
+											</div>
+										)}
+									</div>
+
+									<div className="rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-gray-50 p-4">
+										<div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)]">
+											SHAREHOLDERS
+										</div>
+
+										<div className="mb-1 text-2xl font-bold text-[var(--color-primary)]">
+											{ownership.status === "success" && ownership.data
+												? ownership.data.holders.length
+												: ownership.status === "loading"
+													? "..."
+													: "Not available"}
+										</div>
+
+										{latestComp && (
+											<div className="text-xs text-green-600">
+												+{latestComp.changeInShareholders.toLocaleString()} vs
+												prior month
+											</div>
+										)}
+									</div>
+								</div>
+
+								{ownership.status === "success" && ownership.data && (
+									<div className="mb-6 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-gray-50 p-4">
+										<div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)]">
+											TOTAL REPORTED OWNERSHIP
+										</div>
+
+										<div className="text-2xl font-bold text-[var(--color-primary)]">
+											{totalOwnershipPct !== null
+												? `${(totalOwnershipPct * 100).toFixed(2)}%`
+												: "Not available"}
+										</div>
+
+										<p className="mt-1 text-xs text-[var(--color-muted)]">
+											Sum of reported major shareholders. Remaining is
+											public/free float.
+										</p>
+									</div>
+								)}
+
+								{latestComp && (
+									<div className="mb-6 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-gray-50 p-5">
+										<div className="mb-4 text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)]">
+											LOCAL / FOREIGN COMPOSITION
+										</div>
+
+										<div className="mb-5">
+											<div className="mb-2 flex justify-between text-sm text-[var(--color-primary)]">
+												<span>Local</span>
+
+												<span>
+													{(
+														(latestComp.local.total / latestComp.sharesNumber) *
+														100
+													).toFixed(2)}
+													%
+												</span>
+											</div>
+
+											<div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+												<div
+													className="h-full bg-[var(--color-primary)]"
+													style={{
+														width: `${(
+															(latestComp.local.total /
+																latestComp.sharesNumber) *
+															100
+														).toFixed(2)}%`,
+													}}
+												/>
+											</div>
+										</div>
+
+										<div>
+											<div className="mb-2 flex justify-between text-sm text-[var(--color-primary)]">
+												<span>Foreign</span>
+
+												<span>
+													{(
+														(latestComp.foreign.total /
+															latestComp.sharesNumber) *
+														100
+													).toFixed(2)}
+													%
+												</span>
+											</div>
+
+											<div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+												<div
+													className="h-full bg-purple-500"
+													style={{
+														width: `${(
+															(latestComp.foreign.total /
+																latestComp.sharesNumber) *
+															100
+														).toFixed(2)}%`,
+													}}
+												/>
+											</div>
+										</div>
+									</div>
+								)}
+							</div>
+						)}
+					</div>
+				</main>
+			</div>
+
+			<TraceResultsDrawer candidates={traceCandidates} isLoading={traceLoading} />
+		</div>
+	);
 }
 
 // ---------------------------------------------------------------------------
@@ -804,112 +1286,150 @@ export default function Trace() {
 // ---------------------------------------------------------------------------
 
 function SelectedNodeDetail({
-  nodeId,
-  graphNodes,
-  ownershipData,
-  companyData,
+	nodeId,
+	graphNodes,
+	ownershipData,
+	companyData,
 }: {
-  nodeId: string;
-  graphNodes: GraphNode[];
-  ownershipData: TracePointOwnershipSnapshot | null;
-  companyData: TracePointCompany | null;
+	nodeId: string;
+	graphNodes: GraphNode[];
+	ownershipData: TracePointOwnershipSnapshot | null;
+	companyData: TracePointCompany | null;
 }) {
-  const node = graphNodes.find((n) => n.id === nodeId);
+	const node = graphNodes.find((candidate) => candidate.id === nodeId);
 
-  if (!node) {
-    return (
-      <div className="flex-1 overflow-y-auto p-6 text-center text-gray-400">
-        Node not found
-      </div>
-    );
-  }
+	const navigate = useNavigate();
 
-  const shareholder = ownershipData && node.type === 'shareholder'
-    ? ownershipData.holders.find((h) => h.name === decodeURIComponent(nodeId.replace('sh-', ''))) ?? null
-    : null;
+	if (!node) {
+		return (
+			<div className="flex-1 overflow-y-auto p-6 text-center text-[var(--color-muted)]">
+				Node not found
+			</div>
+		);
+	}
 
-  const isSelectedShareholder = node.type === 'shareholder';
+	const shareholder =
+		ownershipData && node.type === "shareholder"
+			? (ownershipData.holders.find(
+					(holder) =>
+						holder.name === decodeURIComponent(nodeId.replace("sh-", "")),
+				) ?? null)
+			: null;
 
-  return (
-    <div className="flex-1 overflow-y-auto p-6">
-      <div className="mb-1 text-xs font-semibold text-[#00c3d9]">
-        {node.type === 'company' ? 'Company' :
-         node.type === 'shareholder' ? 'Shareholder' :
-         node.type === 'management' ? 'Management' :
-         node.type === 'affiliate' ? 'Affiliate' : 'Conglomerate'}
-      </div>
+	const isSelectedShareholder = node.type === "shareholder";
 
-      <h2 className="mb-4 text-2xl font-bold text-white">{node.label}</h2>
+	return (
+		<div className="flex-1 overflow-y-auto p-6">
+			<div className="mb-1 text-xs font-semibold text-[var(--color-primary)]">
+				{node.type === "company"
+					? "Company"
+					: node.type === "shareholder"
+						? "Shareholder"
+						: node.type === "management"
+							? "Management"
+							: node.type === "affiliate"
+								? "Affiliate"
+								: "Conglomerate"}
+			</div>
 
-      <div className="mb-6 flex gap-2">
-        <span className="rounded-full bg-[#122a3d] px-3 py-1 text-xs font-medium text-[#00c3d9]">
-          {node.type}
-        </span>
-        {node.ticker && (
-          <span className="rounded-full bg-[#122a3d] px-3 py-1 text-xs font-medium text-gray-300">
-            {node.ticker}
-          </span>
-        )}
-        <span className="rounded-full bg-[#122a3d] px-3 py-1 text-xs font-medium text-gray-300">
-          Reported by Sectors
-        </span>
-      </div>
+			<h2 className="mb-4 text-2xl font-bold text-[var(--color-primary)]">
+				{node.label}
+			</h2>
 
-      {isSelectedShareholder && shareholder && (
-        <div className="mb-8 space-y-4 border-t border-[#1d3245] pt-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-400">
-              Ownership in {companyData?.ticker || 'company'}
-            </span>
-            <span className="font-bold text-white">
-              {(shareholder.sharePercentage * 100).toFixed(3)}%
-            </span>
-          </div>
+			<div className="mb-6 flex flex-wrap gap-2">
+				<span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-[var(--color-primary)]">
+					{node.type}
+				</span>
 
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-400">Shares held</span>
-            <span className="font-bold text-white">{formatShares(shareholder.shareAmount)}</span>
-          </div>
+				{node.ticker && (
+					<span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-[var(--color-muted)]">
+						{node.ticker}
+					</span>
+				)}
 
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-400">Share value</span>
-            <span className="font-bold text-white">IDR {formatShares(shareholder.shareValue)}</span>
-          </div>
+				<span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-[var(--color-muted)]">
+					Reported by Sectors
+				</span>
+			</div>
 
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-400">Ownership date</span>
-            <span className="font-bold text-[#f5a623]">Not available</span>
-          </div>
-        </div>
-      )}
+			{isSelectedShareholder && shareholder && (
+				<div className="mb-8 space-y-4 border-t border-[var(--color-border)] pt-4">
+					<div className="flex items-center justify-between">
+						<span className="text-sm text-[var(--color-muted)]">
+							Ownership in {companyData?.ticker || "company"}
+						</span>
 
-      <div className="rounded-xl border border-[#1d3245] bg-[#0d2232] p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="font-bold text-white text-sm">Trace this entity</div>
-            <div className="text-xs text-gray-400 mt-0.5">
-              {node.type === 'shareholder'
-                ? 'Verify across other companies via Company Report'
-                : 'Open as focal company to explore further'}
-            </div>
-          </div>
-          <div className="text-[#00c3d9]">
-            <Building2 size={20} />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+						<span className="font-bold text-[var(--color-primary)]">
+							{(shareholder.sharePercentage * 100).toFixed(3)}%
+						</span>
+					</div>
 
-// ---------------------------------------------------------------------------
-// Utilities
-// ---------------------------------------------------------------------------
+					<div className="flex items-center justify-between">
+						<span className="text-sm text-[var(--color-muted)]">
+							Shares held
+						</span>
 
-function formatDate(dateStr: string): string {
-  if (!dateStr) return 'Not available';
-  const [y, m, d] = dateStr.split('-');
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const month = months[parseInt(m, 10) - 1];
-  return `${month} ${parseInt(d, 10)} ${y}`;
+						<span className="font-bold text-[var(--color-primary)]">
+							{formatShares(shareholder.shareAmount)}
+						</span>
+					</div>
+
+					<div className="flex items-center justify-between">
+						<span className="text-sm text-[var(--color-muted)]">
+							Share value
+						</span>
+
+						<span className="font-bold text-[var(--color-primary)]">
+							IDR {formatShares(shareholder.shareValue)}
+						</span>
+					</div>
+
+					<div className="flex items-center justify-between">
+						<span className="text-sm text-[var(--color-muted)]">
+							Ownership date
+						</span>
+
+						<span className="font-bold text-orange-600">Not available</span>
+					</div>
+				</div>
+			)}
+
+			<div className="rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-gray-50 p-4">
+				<div className="flex items-center justify-between">
+					<div>
+						<div className="text-sm font-bold text-[var(--color-primary)]">
+							{isSelectedShareholder
+								? "Trace this shareholder"
+								: "Open as focal company"}
+						</div>
+
+						<div className="mt-0.5 text-xs text-[var(--color-muted)]">
+							{isSelectedShareholder
+								? "Verify across other companies via Company Report"
+								: "Explore further ownership relationships"}
+						</div>
+					</div>
+
+					<button
+						type="button"
+						onClick={() => {
+							if (isSelectedShareholder && shareholder) {
+								navigate(
+									`/trace?shareholder=${encodeURIComponent(shareholder.name)}&ticker=${encodeURIComponent(companyData?.ticker ?? "")}`,
+								);
+							} else if (companyData) {
+								navigate(
+									`/trace?ticker=${encodeURIComponent(companyData.ticker)}`,
+								);
+							}
+						}}
+						className="inline-flex items-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-primary)] px-4 py-2 text-sm font-bold text-[var(--color-accent)] transition-colors hover:opacity-90"
+					>
+						<Building2 size={14} />
+						{isSelectedShareholder ? "Trace" : "Open"}
+					</button>
+				</div>
+			</div>
+		</div>
+	);
 }

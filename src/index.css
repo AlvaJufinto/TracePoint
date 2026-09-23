@@ -1,3 +1,145 @@
+/** @format */
+
 @import "tailwindcss";
 
-/* Custom global styles can go here if needed */
+:root {
+	--color-primary: #070a25;
+	--color-accent: #cbff2e;
+	--color-surface: #f8f8ff;
+	--color-surface-elevated: #ffffff;
+	--color-border: #d4d4d8;
+	--color-border-strong: #a1a1aa;
+	--color-muted: #71717a;
+	--color-muted-foreground: #52525b;
+	--color-text: #18181b;
+	--color-text-secondary: #52525b;
+	--color-success: #22c55e;
+	--color-error: #ef4444;
+	--color-warning: #f59e0b;
+	--color-info: #00c3d9;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html {
+	scroll-behavior: smooth;
+}
+
+body {
+	margin: 0;
+	background-color: var(--color-surface);
+	color: var(--color-text);
+	font-family:
+		-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+		Arial, sans-serif;
+	font-size: 14px;
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	color: var(--color-primary);
+	font-weight: 600;
+	line-height: 1.25;
+	margin: 0;
+}
+
+h1 {
+	font-size: 2rem;
+}
+h2 {
+	font-size: 1.5rem;
+}
+h3 {
+	font-size: 1.25rem;
+}
+h4 {
+	font-size: 1rem;
+}
+
+a {
+	color: var(--color-primary);
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+button {
+	font-family: inherit;
+	cursor: pointer;
+}
+
+input,
+textarea,
+select {
+	font-family: inherit;
+	font-size: inherit;
+}
+
+/* Focus styles */
+:focus-visible {
+	outline: 2px solid var(--color-accent);
+	outline-offset: 2px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--color-surface);
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--color-border);
+	border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--color-border-strong);
+}
+
+/* React Flow overrides for light theme */
+.react-flow__background {
+	background-color: var(--color-surface) !important;
+}
+
+.react-flow__node {
+	font-family: inherit !important;
+}
+
+.react-flow__edge-path {
+	/* Will be overridden per-edge, but default */
+}
+
+/* Selection color */
+::selection {
+	background-color: var(--color-accent);
+	color: var(--color-primary);
+}
+
+/* Drawer slide transition */
+@keyframes slideIn {
+	from {
+		transform: translateX(100%);
+	}
+	to {
+		transform: translateX(0);
+	}
+}
+
+aside[role="dialog"] {
+	animation: slideIn 0.2s ease-out;
+}
