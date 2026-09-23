@@ -99,7 +99,7 @@ export interface TracePointFreeFloat {
 
 export interface TracePointComposition {
   ticker: string;
-  year: number;
+  year?: number;
   snapshots: TracePointCompositionSnapshot[];
   latestSnapshot: TracePointCompositionSnapshot | null;
 }

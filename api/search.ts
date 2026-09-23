@@ -6,6 +6,7 @@ import { sectorsFetch } from "./_lib/sectors-fetch";
 import {
 	checkRateLimit,
 	errorResponse,
+	getClientIp,
 	rateLimitResponse,
 	successResponse,
 } from "./_lib/server";
@@ -17,9 +18,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		return errorResponse(res, 405, "Method not allowed");
 	}
 
-	const ip =
-		req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || "unknown";
-	// @ts-ignore
+	const ip = getClientIp(req);
 
 	if (!checkRateLimit(ip)) {
 		return rateLimitResponse(res);

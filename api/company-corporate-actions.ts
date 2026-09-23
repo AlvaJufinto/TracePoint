@@ -10,6 +10,7 @@ import {
 import {
 	checkRateLimit,
 	errorResponse,
+	getClientIp,
 	rateLimitResponse,
 	successResponse,
 } from "./_lib/server";
@@ -21,9 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		return errorResponse(res, 405, "Method not allowed");
 	}
 
-	const ip =
-		req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || "unknown";
-	// @ts-ignore
+	const ip = getClientIp(req);
 
 	if (!checkRateLimit(ip)) {
 		return rateLimitResponse(res);
@@ -65,9 +64,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
 		return successResponse(res, {
 			ticker: normalized,
-			agm: ca.agm ?? null,
-			dividends: ca.dividend ?? null,
-			stockSplits: ca.stock_split ?? null,
+			agm:
+				ca.agm?.map((item) => ({
+					date: item.agm_date,
+					time: item.agm_time,
+					place: item.agm_place,
+					result: item.agm_result,
+				})) ?? null,
+			dividends:
+				ca.dividend?.map((item) => ({
+					exDate: item.ex_date,
+					paymentDate: item.payment_date,
+					dividendYield: item.dividend_yield ?? null,
+					dividendAmount: item.dividend_amount,
+				})) ?? null,
+			stockSplits:
+				ca.stock_split?.map((item) => ({
+					date: item.date,
+					splitRatio: item.split_ratio,
+				})) ?? null,
 			bonus: null,
 			warrant: null,
 			rightIssue: null,

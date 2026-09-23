@@ -10,6 +10,7 @@ import {
 import {
 	checkRateLimit,
 	errorResponse,
+	getClientIp,
 	rateLimitResponse,
 	successResponse,
 } from "./_lib/server";
@@ -21,9 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		return errorResponse(res, 405, "Method not allowed");
 	}
 
-	const ip =
-		req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || "unknown";
-	// @ts-ignore
+	const ip = getClientIp(req);
 	if (!checkRateLimit(ip)) {
 		return rateLimitResponse(res);
 	}
@@ -48,30 +47,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 			data?: Array<{
 				date: string;
 				shares_number: number;
-				local: {
-					insurance?: number;
-					corporate?: number;
-					pension_fund?: number;
-					financial_institutions?: number;
-					individual?: number;
-					mutual_fund?: number;
-					securities_companies?: number;
-					foundation?: number;
-					other?: number;
-					total?: number;
-				};
-				foreign: {
-					insurance?: number;
-					corporate?: number;
-					pension_fund?: number;
-					financial_institutions?: number;
-					individual?: number;
-					mutual_fund?: number;
-					securities_companies?: number;
-					foundation?: number;
-					other?: number;
-					total?: number;
-				};
+				insurance_l?: number;
+				corporate_l?: number;
+				pension_fund_l?: number;
+				financial_institutions_l?: number;
+				individual_l?: number;
+				mutual_fund_l?: number;
+				securities_companies_l?: number;
+				foundation_l?: number;
+				other_l?: number;
+				total_l?: number;
+				insurance_f?: number;
+				corporate_f?: number;
+				pension_fund_f?: number;
+				financial_institutions_f?: number;
+				individual_f?: number;
+				mutual_fund_f?: number;
+				securities_companies_f?: number;
+				foundation_f?: number;
+				other_f?: number;
+				total_f?: number;
 				numbers_of_shareholders?: number;
 				change_in_shareholders?: number;
 			}>;
@@ -90,30 +85,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 			.filter((s) => s.date && s.shares_number > 0)
 			.sort((a, b) => b.date.localeCompare(a.date));
 
-		const latest = snapshots[0];
-
-		const cleanSnapshot = latest
-			? {
-					date: latest.date,
-					sharesNumber: latest.shares_number,
-					localTotal: latest.local?.total ?? 0,
-					foreignTotal: latest.foreign?.total ?? 0,
-					numbersOfShareholders: latest.numbers_of_shareholders ?? 0,
-					changeInShareholders: latest.change_in_shareholders ?? 0,
-				}
-			: null;
+		const cleanSnapshots = snapshots.map((snapshot) => ({
+			date: snapshot.date,
+			sharesNumber: snapshot.shares_number,
+			local: {
+				insurance: snapshot.insurance_l ?? 0,
+				corporate: snapshot.corporate_l ?? 0,
+				pensionFund: snapshot.pension_fund_l ?? 0,
+				financialInstitutions:
+					snapshot.financial_institutions_l ?? 0,
+				individual: snapshot.individual_l ?? 0,
+				mutualFund: snapshot.mutual_fund_l ?? 0,
+				securitiesCompanies:
+					snapshot.securities_companies_l ?? 0,
+				foundation: snapshot.foundation_l ?? 0,
+				other: snapshot.other_l ?? 0,
+				total: snapshot.total_l ?? 0,
+			},
+			foreign: {
+				insurance: snapshot.insurance_f ?? 0,
+				corporate: snapshot.corporate_f ?? 0,
+				pensionFund: snapshot.pension_fund_f ?? 0,
+				financialInstitutions:
+					snapshot.financial_institutions_f ?? 0,
+				individual: snapshot.individual_f ?? 0,
+				mutualFund: snapshot.mutual_fund_f ?? 0,
+				securitiesCompanies:
+					snapshot.securities_companies_f ?? 0,
+				foundation: snapshot.foundation_f ?? 0,
+				other: snapshot.other_f ?? 0,
+				total: snapshot.total_f ?? 0,
+			},
+			numberOfShareholders: snapshot.numbers_of_shareholders ?? 0,
+			changeInShareholders: snapshot.change_in_shareholders ?? 0,
+		}));
 
 		return successResponse(res, {
 			ticker: normalized,
-			latestSnapshot: cleanSnapshot,
-			snapshots: snapshots.map((s) => ({
-				date: s.date,
-				sharesNumber: s.shares_number,
-				localTotal: s.local?.total ?? 0,
-				foreignTotal: s.foreign?.total ?? 0,
-				numbersOfShareholders: s.numbers_of_shareholders ?? 0,
-				changeInShareholders: s.change_in_shareholders ?? 0,
-			})),
+			year: compositionData.year ?? Number(snapshots[0].date.slice(0, 4)),
+			latestSnapshot: cleanSnapshots[0] ?? null,
+			snapshots: cleanSnapshots,
 		});
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : "Unknown error";

@@ -26,15 +26,14 @@ export async function sectorsFetch<T>(
 	params: Record<string, string | number | boolean | undefined> = {},
 ): Promise<T> {
 	const key = cacheKey(endpoint, params);
+	const normalizedEndpoint = endpoint.replace(/^\/+|\/+$/g, "");
 
-	console.log(
-		"🚀 ~ sectorsFetch ~ process.env.SECTORS_API_KEY:",
-		process.env.SECTORS_API_KEY,
-	);
 	return getOrSet(
 		key,
 		async () => {
-			const response = await axios.get<T>(`${SECTORS_BASE}/${endpoint}/`, {
+			const response = await axios.get<T>(
+				`${SECTORS_BASE}/${normalizedEndpoint}/`,
+				{
 				params,
 				headers: {
 					Authorization: process.env.SECTORS_API_KEY ?? "",

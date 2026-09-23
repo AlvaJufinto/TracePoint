@@ -3,7 +3,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import { sectorsFetch } from "./_lib/sectors-fetch";
-import { checkTraceLimit, errorResponse, successResponse } from "./_lib/server";
+import {
+	checkTraceLimit,
+	errorResponse,
+	getClientIp,
+	successResponse,
+} from "./_lib/server";
 
 export const config = { runtime: "nodejs" };
 
@@ -37,9 +42,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		return errorResponse(res, 400, "maxBatchSize must be between 1 and 200");
 	}
 
-	const ip =
-		req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || "unknown";
-	// @ts-ignore
+	const ip = getClientIp(req);
 	const traceLimit = checkTraceLimit(ip, maxBatchSize ?? undefined);
 
 	if (!traceLimit.allowed) {

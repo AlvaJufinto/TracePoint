@@ -367,8 +367,8 @@ export default function Trace() {
     createPanelState(),
   );
 
-  // Data loading — mount-only fetch
-  async function fetchCompanyData() {
+  // Data loading — fetch once per ticker change
+  const fetchCompanyData = useCallback(async () => {
     const [companyResult, ownershipResult, managementResult] = await Promise.allSettled([
       getCompanyOverview(ticker),
       getCompanyOwnership(ticker),
@@ -417,7 +417,7 @@ export default function Trace() {
         }
       }
     }
-  }
+  }, [ticker]);
 
   useEffect(() => {
     (async () => {

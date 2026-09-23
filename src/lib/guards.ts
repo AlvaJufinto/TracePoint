@@ -102,7 +102,7 @@ export function isTracePointComposition(data: unknown): data is TracePointCompos
   if (!data || typeof data !== 'object') return false;
   const d = data as Record<string, unknown>;
   if (typeof d.ticker !== 'string') return false;
-  if (typeof d.year !== 'number') return false;
+  if (d.year !== undefined && typeof d.year !== 'number') return false;
   if (!Array.isArray(d.snapshots)) return false;
   // latestSnapshot can be null
   if (d.latestSnapshot !== null && typeof d.latestSnapshot !== 'object') return false;

@@ -103,7 +103,7 @@ export async function getCompanyOwnership(
 	ticker: string,
 ): Promise<TracePointOwnershipSnapshot> {
 	const data = await apiFetch<TracePointOwnershipSnapshot>(
-		`/company-ownership?q=${encodeURIComponent(ticker)}`,
+		`/company-ownership?ticker=${encodeURIComponent(ticker)}`,
 	);
 	if (!isTracePointOwnershipSnapshot(data)) {
 		throw new Error(`Invalid ownership response for ${ticker}`);
@@ -115,7 +115,7 @@ export async function getCompanyManagement(
 	ticker: string,
 ): Promise<TracePointManagement> {
 	const data = await apiFetch<TracePointManagement>(
-		`/company-management?q=${encodeURIComponent(ticker)}`,
+		`/company-management?ticker=${encodeURIComponent(ticker)}`,
 	);
 	// Basic runtime check — management shape is simpler
 	if (
@@ -207,7 +207,7 @@ export async function getFreeFloat(
 	ticker: string,
 ): Promise<TracePointFreeFloat> {
 	const data = await apiFetch<TracePointFreeFloat>(
-		`/company-free-float?q=${encodeURIComponent(ticker)}`,
+		`/company-free-float?ticker=${encodeURIComponent(ticker)}`,
 	);
 	if (!isTracePointFreeFloat(data)) {
 		throw new Error(`Invalid free float response for ${ticker}`);
@@ -223,7 +223,7 @@ export async function getShareholderComposition(
 	ticker: string,
 ): Promise<TracePointComposition> {
 	const data = await apiFetch<TracePointComposition>(
-		`/company-composition?q=${encodeURIComponent(ticker)}`,
+		`/company-composition?ticker=${encodeURIComponent(ticker)}`,
 	);
 	if (!isTracePointComposition(data)) {
 		throw new Error(`Invalid composition response for ${ticker}`);
@@ -239,7 +239,7 @@ export async function getCorporateActions(
 	ticker: string,
 ): Promise<TracePointCorporateActions> {
 	const data = await apiFetch<TracePointCorporateActions>(
-		`/company-corporate-actions?q=${encodeURIComponent(ticker)}`,
+		`/company-corporate-actions?ticker=${encodeURIComponent(ticker)}`,
 	);
 	if (!isTracePointCorporateActions(data)) {
 		throw new Error(`Invalid corporate actions response for ${ticker}`);

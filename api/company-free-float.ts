@@ -10,6 +10,7 @@ import {
 import {
 	checkRateLimit,
 	errorResponse,
+	getClientIp,
 	rateLimitResponse,
 	successResponse,
 } from "./_lib/server";
@@ -21,9 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		return errorResponse(res, 405, "Method not allowed");
 	}
 
-	const ip =
-		req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || "unknown";
-	// @ts-ignore
+	const ip = getClientIp(req);
 	if (!checkRateLimit(ip)) {
 		return rateLimitResponse(res);
 	}
@@ -41,15 +40,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 	}
 
 	try {
-		const data = await sectorsFetch<{
-			symbol?: string;
-			freeFloat?: number;
-		}>("free-float", {});
+		const data = await sectorsFetch<
+			Array<{
+				symbol: string;
+				company_name: string;
+				free_float: number;
+			}>
+		>("free-float", {});
 
-		// @ts-ignore
-		const entry = data.find(
-			(item: { symbol?: string }) => item.symbol === normalized,
-		);
+		const entry = data.find((item) => item.symbol === normalized);
 
 		if (!entry) {
 			return errorResponse(res, 404, `Free float not found for ${normalized}`);
@@ -57,7 +56,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
 		return successResponse(res, {
 			ticker: normalized,
-			freeFloat: entry.freeFloat,
+			companyName: entry.company_name,
+			freeFloat: entry.free_float,
 		});
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : "Unknown error";

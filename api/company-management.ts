@@ -10,6 +10,7 @@ import {
 import {
 	checkRateLimit,
 	errorResponse,
+	getClientIp,
 	rateLimitResponse,
 	successResponse,
 } from "./_lib/server";
@@ -21,9 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		return errorResponse(res, 405, "Method not allowed");
 	}
 
-	const ip =
-		req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || "unknown";
-	// @ts-ignore
+	const ip = getClientIp(req);
 
 	if (!checkRateLimit(ip)) {
 		return rateLimitResponse(res);
@@ -47,6 +46,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 			company_name?: string;
 			management?: {
 				key_executives?: Array<{ name: string; position: string }>;
+				executives_shareholdings?: Array<{
+					name: string;
+					position: string;
+					share_amount: number;
+					share_percentage: number;
+				}>;
 			};
 		}>(`company/report/${normalized}`, { sections: "management" });
 
@@ -54,6 +59,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 			ticker: normalized,
 			name: data.company_name,
 			keyExecutives: data.management?.key_executives ?? [],
+			executivesShareholdings:
+				data.management?.executives_shareholdings?.map((holding) => ({
+					name: holding.name,
+					position: holding.position,
+					shareAmount: holding.share_amount,
+					sharePercentage: holding.share_percentage,
+				})) ?? [],
 		});
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : "Unknown error";

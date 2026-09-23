@@ -1,4 +1,4 @@
-import type { VercelResponse } from '@vercel/node';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const MAX_REQUESTS_PER_WINDOW = 60;
@@ -9,6 +9,12 @@ interface RateLimitEntry {
 }
 
 const rateLimitMap = new Map<string, RateLimitEntry>();
+
+export function getClientIp(req: Pick<VercelRequest, 'headers'>): string {
+  const rawIp =
+    req.headers['x-forwarded-for'] ?? req.headers['x-real-ip'] ?? 'unknown';
+  return Array.isArray(rawIp) ? (rawIp[0] ?? 'unknown') : rawIp;
+}
 
 export function checkRateLimit(ip: string): boolean {
   const now = Date.now();

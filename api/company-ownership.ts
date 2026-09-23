@@ -10,6 +10,7 @@ import {
 import {
 	checkRateLimit,
 	errorResponse,
+	getClientIp,
 	isNonTraceableShareholder,
 	rateLimitResponse,
 	successResponse,
@@ -22,9 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		return errorResponse(res, 405, "Method not allowed");
 	}
 
-	const ip =
-		req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || "unknown";
-	// @ts-ignore
+	const ip = getClientIp(req);
 	if (!checkRateLimit(ip)) {
 		return rateLimitResponse(res);
 	}
@@ -55,6 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 					symbol?: string | null;
 				}>;
 				whale_investors?: string[] | null;
+				conglomerates_group?: string[] | null;
 			};
 		}>(`company/report/${normalized}`, { sections: "ownership" });
 
@@ -70,13 +70,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 			symbol?: string;
 		}> = [];
 
-		let totalReportedPct = 0;
-
 		for (const sh of holdersRaw) {
 			const pct = parseFloat((sh.share_percentage ?? "0").toString());
 			if (isNaN(pct)) continue;
-
-			totalReportedPct += pct;
 
 			// Skip non-traceable (Public, Treasury Stock)
 			if (isNonTraceableShareholder(sh.name)) continue;
@@ -90,19 +86,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 			});
 		}
 
-		// Calculate public/free float as remainder
-		const freeFloatPct = 1 - totalReportedPct;
-
 		return successResponse(res, {
 			ticker: normalized,
 			companyName: ownershipData.company_name,
 			// Major shareholders (traceable only — NOT Public/Treasury)
-			majorShareholders: traceableHolders,
+			holders: traceableHolders,
 			// Context metadata (NOT ownership edges)
 			whaleInvestors: whales,
-			// Aggregates
-			totalReportedPercentage: totalReportedPct,
-			freeFloatPercentage: freeFloatPct,
+			conglomeratesGroup:
+				ownershipData.ownership?.conglomerates_group ?? null,
+			// Sectors does not expose an ownership snapshot date.
+			asOf: null,
 		});
 	} catch (err) {
 		const msg = err instanceof Error ? err.message : "Unknown error";
