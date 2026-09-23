@@ -48,18 +48,38 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
 		},
 	});
 
+	const responseText = await response.text();
+
+	let body: unknown = null;
+
+	if (responseText) {
+		try {
+			body = JSON.parse(responseText);
+		} catch {
+			body = responseText;
+		}
+	}
+
 	if (!response.ok) {
 		let errorMessage = `HTTP ${response.status}`;
-		try {
-			const body = await response.json();
-			errorMessage = body.error || JSON.stringify(body);
-		} catch {
-			errorMessage = (await response.text()) || errorMessage;
+
+		if (typeof body === "string" && body.trim()) {
+			errorMessage = body;
+		} else if (
+			body &&
+			typeof body === "object" &&
+			"error" in body &&
+			typeof body.error === "string"
+		) {
+			errorMessage = body.error;
+		} else if (body !== null) {
+			errorMessage = JSON.stringify(body);
 		}
+
 		throw new Error(errorMessage);
 	}
 
-	return response.json();
+	return body as T;
 }
 
 // ---------------------------------------------------------------------------
