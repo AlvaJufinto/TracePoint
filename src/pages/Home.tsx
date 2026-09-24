@@ -7,7 +7,7 @@ export default function Home() {
     <div className="mx-auto max-w-3xl py-6 sm:py-12">
       <div className="text-center">
         <h1 className="flex justify-center text-[var(--color-primary)]">
-          <BrandLogo className="text-4xl sm:text-5xl" />
+          <BrandLogo className="h-24 sm:h-28" />
         </h1>
 
         <p className="mt-4 text-lg text-[var(--color-muted)] leading-relaxed max-w-xl mx-auto">

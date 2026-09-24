@@ -23,7 +23,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 							aria-label="TracePoint home"
 							className="group inline-flex items-center"
 						>
-							<BrandLogo className="text-xl text-[var(--color-primary)] transition-opacity group-hover:opacity-70" />
+							<BrandLogo className="h-10 transition-opacity group-hover:opacity-70" />
 						</Link>
 						{isTrace && (
 							<Link
@@ -57,15 +57,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 					<div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
 						<div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
 							{/* Brand */}
-							<div className="flex items-center gap-3">
-								<BrandLogo iconOnly className="text-3xl" />
-
-								<div className="flex flex-col">
-									<span className="text-sm font-semibold text-[var(--color-surface)]">
-										TracePoint
-									</span>
-								</div>
-							</div>
+							<BrandLogo variant="white" className="h-12" />
 
 							{/* Description */}
 							<div className="max-w-md text-left sm:text-right">
