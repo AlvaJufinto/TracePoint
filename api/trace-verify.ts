@@ -19,20 +19,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!limit.allowed) return errorResponse(res, 429, 'Too many trace requests. Please try again later.');
   const unique: TraceCandidate[] = [...new Map(candidates.map(c => [c.ticker, c])).values()] as TraceCandidate[];
   const batch = unique.slice(0, limit.limit);
-  const results: TraceVerification[] = [];
-  for (const candidate of batch) {
+  const results = await Promise.all(batch.map(async (candidate): Promise<TraceVerification> => {
     try {
       const report = await sectorsFetch<{ ownership?: { major_shareholders?: Array<{name: string; share_percentage?: string | number | null; share_amount?: number | null}> } }>(
         `company/report/${candidate.ticker}`, { sections: 'ownership' });
       const match = report.ownership?.major_shareholders?.find(holder => normalizeName(holder.name) === normalizeName(candidate.screenerName));
-      results.push(match ? {
+      return match ? {
         status: 'confirmed', ticker: candidate.ticker, screenerName: candidate.screenerName, ownershipName: match.name,
         sharePercentage: match.share_percentage == null || match.share_percentage === '' || !Number.isFinite(Number(match.share_percentage)) ? null : Number(match.share_percentage),
         shareAmount: match.share_amount ?? null,
-      } : { status: 'mismatch', ticker: candidate.ticker, screenerName: candidate.screenerName });
-    } catch {
-      results.push({ status: 'not_found', ticker: candidate.ticker, screenerName: candidate.screenerName });
+      } : { status: 'mismatch', ticker: candidate.ticker, screenerName: candidate.screenerName };
+    } catch (error) {
+      console.error('Sectors ownership verification failed', {
+        ticker: candidate.ticker,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return { status: 'not_found', ticker: candidate.ticker, screenerName: candidate.screenerName };
     }
-  }
+  }));
   return successResponse(res, { results, processed: results.length, limited: unique.length > batch.length, maxBatch: limit.limit });
 }

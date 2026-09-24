@@ -133,7 +133,7 @@ export async function getCompanyManagement(
 
 export async function searchCompanies(
 	query: string,
-	options?: { where?: string; limit?: number; offset?: number },
+	options?: { where?: string; limit?: number; offset?: number; signal?: AbortSignal },
 ): Promise<TracePointScreenerResponse> {
 	const params = new URLSearchParams();
 	if (options?.where) {
@@ -144,7 +144,9 @@ export async function searchCompanies(
 	if (options?.limit) params.set("limit", options.limit.toString());
 	if (options?.offset) params.set("offset", options.offset.toString());
 
-	const data = await apiFetch<TracePointScreenerResponse>(`/search?${params}`);
+	const data = await apiFetch<TracePointScreenerResponse>(`/search?${params}`, {
+		signal: options?.signal,
+	});
 	if (!isTracePointScreenerResponse(data)) {
 		throw new Error("Invalid search response");
 	}
@@ -158,10 +160,11 @@ export async function searchCompanies(
 export async function searchByShareholderName(
 	shareholderName: string,
 	limit = 50,
+	signal?: AbortSignal,
 ): Promise<TracePointScreenerResponse> {
 	const escaped = shareholderName.replace(/'/g, "''");
 	const where = `major_shareholders_name like '%${escaped}%'`;
-	return searchCompanies("", { where, limit });
+	return searchCompanies("", { where, limit, signal });
 }
 
 // ---------------------------------------------------------------------------
@@ -182,10 +185,12 @@ export interface TraceVerifyResponse {
 
 export async function verifyTraceCandidates(
 	request: TraceVerifyRequest,
+	signal?: AbortSignal,
 ): Promise<TraceVerifyResponse> {
 	const data = await apiFetch<TraceVerifyResponse>("/trace-verify", {
 		method: "POST",
 		body: JSON.stringify(request),
+		signal,
 	});
 
 	// Validate each result

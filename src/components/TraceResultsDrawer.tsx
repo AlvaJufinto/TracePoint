@@ -32,7 +32,6 @@ export default function TraceResultsDrawer({
 	onRetry,
 	onVerifyNext,
 }: Props) {
-	console.log("🚀 ~ TraceResultsDrawer ~ error:", error);
 	const dialog = useRef<HTMLDialogElement>(null);
 	useEffect(() => {
 		const element = dialog.current!;
@@ -52,7 +51,6 @@ export default function TraceResultsDrawer({
 	const remaining = candidates.filter(
 		(item) => item.verification?.status !== "confirmed",
 	);
-	console.log("🚀 ~ TraceResultsDrawer ~ confirmed:", confirmed);
 	function results(items: TraceCandidate[]) {
 		return items.map((candidate) => {
 			const checked = candidate.verification;

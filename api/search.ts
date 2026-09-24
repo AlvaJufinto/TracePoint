@@ -2,7 +2,7 @@
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import { sectorsFetch } from "./_lib/sectors-fetch";
+import { sectorsFetch, SectorsApiError } from "./_lib/sectors-fetch";
 import {
 	checkRateLimit,
 	errorResponse,
@@ -12,8 +12,12 @@ import {
 } from "./_lib/server";
 
 export const config = { runtime: "nodejs" };
+const SEARCH_HANDLER_VERSION = "2026-09-24.2";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+	res.setHeader("Cache-Control", "no-store");
+	res.setHeader("X-TracePoint-Search-Version", SEARCH_HANDLER_VERSION);
+
 	if (req.method !== "GET") {
 		return errorResponse(res, 405, "Method not allowed");
 	}
@@ -67,8 +71,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 			nextOffset: parsedOffset + parsedLimit,
 		});
 	} catch (err) {
-		const msg = err instanceof Error ? err.message : "Unknown error";
-		console.error("Sectors API error:", msg);
+		if (err instanceof SectorsApiError) {
+			console.error("Sectors API search failed", {
+				code: err.code,
+				status: err.status,
+				message: err.message,
+			});
+			return res.status(502).json({
+				error:
+					err.code === "UPSTREAM_TIMEOUT"
+						? "Sectors API timed out. Please retry."
+						: "Sectors API request failed. Please retry.",
+				code: err.code,
+				upstreamStatus: err.status,
+			});
+		}
+
+		console.error("Unexpected company search error:", err);
 		return errorResponse(res, 502, "Failed to search companies");
 	}
 }
