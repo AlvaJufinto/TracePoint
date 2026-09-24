@@ -1,0 +1,843 @@
+{
+  "meta": {
+    "schemaVersion": 1,
+    "source": "live-sectors-api",
+    "capturedAt": "2026-09-24",
+    "liveApiCallsUsed": 6,
+    "estimatedCreditsUsed": 8,
+    "dataShape": "TracePoint internal normalized contracts",
+    "completeness": "BBCA-only detail fixture",
+    "notes": [
+      "Fixture scope is BBCA.JK only.",
+      "Raw BBCA responses are stored in api/fixtures/raw.",
+      "Free float was not refreshed because that endpoint costs 10 credits; the value is from the documented 2026-09-22 capture.",
+      "Ownership asOf remains null because Sectors does not expose that date."
+    ]
+  },
+  "companies": {
+    "BBCA.JK": {
+      "overview": {
+        "ticker": "BBCA.JK",
+        "name": "PT Bank Central Asia Tbk.",
+        "sector": "Financials",
+        "subSector": "Banks",
+        "industry": "Banks",
+        "subIndustry": "Banks",
+        "listingBoard": "Main",
+        "marketCap": 768866486850000,
+        "marketCapRank": 1,
+        "employeeNum": 27937.0,
+        "listingDate": "2000-05-31",
+        "address": "Menara BCA, Grand Indonesia\r\nJalan MH Thamrin No. 1\r\nJakarta 10310",
+        "website": "www.bca.co.id",
+        "phone": "021-23588000",
+        "email": "investor_relations@bca.co.id",
+        "lastClosePrice": 6300,
+        "latestCloseDate": "2026-09-23",
+        "dailyCloseChange": 0.0161290322580645,
+        "allTimePrice": {
+          "ytd_low": {
+            "2026-06-09": 4820
+          },
+          "52_w_low": {
+            "2026-06-09": 4820
+          },
+          "90_d_low": {
+            "2026-06-30": 5550
+          },
+          "ytd_high": {
+            "2026-01-06": 8175
+          },
+          "52_w_high": {
+            "2025-10-30": 8750
+          },
+          "90_d_high": {
+            "2026-09-04": 6850
+          },
+          "all_time_low": {
+            "2004-06-08": 175
+          },
+          "all_time_high": {
+            "2024-09-23": 10950
+          }
+        },
+        "esgScore": 21.71,
+        "tags": [
+          "dividend-yield-ttm-above-5-percent",
+          "esg-under-25",
+          "top-20-institution-selling",
+          "top-90d-transaction-value"
+        ],
+        "indices": [
+          "IDXHIDIV20",
+          "LQ45",
+          "KOMPAS100",
+          "IDXQ30",
+          "IDXESGL",
+          "IDX30",
+          "ECONOMIC30",
+          "IDXG30",
+          "FTSE",
+          "SRIKEHATI"
+        ],
+        "affiliates": [
+          "Djarum",
+          "Hartono"
+        ]
+      },
+      "ownership": {
+        "ticker": "BBCA.JK",
+        "companyName": "PT Bank Central Asia Tbk.",
+        "holders": [
+          {
+            "name": "PT Dwimuria Investama Andalan",
+            "shareValue": 426698685000000,
+            "shareAmount": 67729950000,
+            "sharePercentage": 0.54942
+          },
+          {
+            "name": "Public",
+            "shareValue": 346697981645400,
+            "shareAmount": 55031425658,
+            "sharePercentage": 0.44642
+          },
+          {
+            "name": "Treasury Stock",
+            "shareValue": 2729781810000,
+            "shareAmount": 433298700,
+            "sharePercentage": 0.00351
+          },
+          {
+            "name": "Jahja Setiaatmadja",
+            "shareValue": 225557010000,
+            "shareAmount": 35802700,
+            "sharePercentage": 0.0003
+          },
+          {
+            "name": "Tan Ho Hien/Subur Disebut Juga Subur Tan",
+            "shareValue": 74264412600,
+            "shareAmount": 11788002,
+            "sharePercentage": 0.0001
+          },
+          {
+            "name": "Tonny Kusnadi",
+            "shareValue": 49265685000,
+            "shareAmount": 7819950,
+            "sharePercentage": 6e-05
+          },
+          {
+            "name": "Vera Eve Lim",
+            "shareValue": 20673198000,
+            "shareAmount": 3281460,
+            "sharePercentage": 3e-05
+          },
+          {
+            "name": "Lianawaty Suwono",
+            "shareValue": 24609324600,
+            "shareAmount": 3906242,
+            "sharePercentage": 3e-05
+          },
+          {
+            "name": "Santoso",
+            "shareValue": 23713590600,
+            "shareAmount": 3764062,
+            "sharePercentage": 3e-05
+          },
+          {
+            "name": "Armand Wahyudi Hartono",
+            "shareValue": 26813209500,
+            "shareAmount": 4256065,
+            "sharePercentage": 3e-05
+          },
+          {
+            "name": "Frengky Chandra Kusuma",
+            "shareValue": 17866270800,
+            "shareAmount": 2835916,
+            "sharePercentage": 2e-05
+          },
+          {
+            "name": "Gregory Hendra Lembong",
+            "shareValue": 16801602300,
+            "shareAmount": 2666921,
+            "sharePercentage": 2e-05
+          }
+        ],
+        "whaleInvestors": [
+          "Anthoni Salim"
+        ],
+        "conglomeratesGroup": [
+          "Djarum Group"
+        ],
+        "asOf": null
+      },
+      "management": {
+        "ticker": "BBCA.JK",
+        "keyExecutives": [
+          {
+            "name": "Gregory Hendra Lembong",
+            "position": "President Director"
+          },
+          {
+            "name": "Armand Wahyudi Hartono",
+            "position": "Vice President Director"
+          },
+          {
+            "name": "John Kosasih",
+            "position": "Vice President Director"
+          },
+          {
+            "name": "Tan Ho Hien/Subur Atau Dipanggil Subur Tan",
+            "position": "Director"
+          },
+          {
+            "name": "Lianawaty Suwono",
+            "position": "Director"
+          },
+          {
+            "name": "Santoso",
+            "position": "Director"
+          },
+          {
+            "name": "Vera Eve Lim",
+            "position": "Director"
+          },
+          {
+            "name": "Haryanto Tiara Budiman",
+            "position": "Director"
+          },
+          {
+            "name": "Frengky Chandra Kusuma",
+            "position": "Director"
+          },
+          {
+            "name": "Antonius Widodo Mulyono",
+            "position": "Director"
+          },
+          {
+            "name": "Hendra Tanumihardja",
+            "position": "Director"
+          },
+          {
+            "name": "David Formula",
+            "position": "Director"
+          }
+        ],
+        "executivesShareholdings": [
+          {
+            "name": "Armand Wahyudi Hartono",
+            "position": "Vice President Director",
+            "shareAmount": 4256065,
+            "sharePercentage": 3e-05
+          },
+          {
+            "name": "Frengky Chandra Kusuma",
+            "position": "Director",
+            "shareAmount": 2835916,
+            "sharePercentage": 2e-05
+          },
+          {
+            "name": "Gregory Hendra Lembong",
+            "position": "President Director",
+            "shareAmount": 2666921,
+            "sharePercentage": 2e-05
+          },
+          {
+            "name": "Jahja Setiaatmadja",
+            "position": "President Commissioner",
+            "shareAmount": 35802700,
+            "sharePercentage": 0.0003
+          },
+          {
+            "name": "Lianawaty Suwono",
+            "position": "Director",
+            "shareAmount": 3906242,
+            "sharePercentage": 3e-05
+          },
+          {
+            "name": "Santoso",
+            "position": "Director",
+            "shareAmount": 3764062,
+            "sharePercentage": 3e-05
+          },
+          {
+            "name": "Tonny Kusnadi",
+            "position": "Commissioner",
+            "shareAmount": 7819950,
+            "sharePercentage": 6e-05
+          },
+          {
+            "name": "Vera Eve Lim",
+            "position": "Director",
+            "shareAmount": 3281460,
+            "sharePercentage": 3e-05
+          }
+        ]
+      },
+      "freeFloat": {
+        "ticker": "BBCA.JK",
+        "companyName": "PT Bank Central Asia Tbk.",
+        "freeFloat": 0.45058
+      },
+      "composition": {
+        "ticker": "BBCA.JK",
+        "year": 2026,
+        "snapshots": [
+          {
+            "date": "2026-08-31",
+            "sharesNumber": 123275050000,
+            "local": {
+              "insurance": 2351378590,
+              "corporate": 650217360,
+              "pensionFund": 324857000,
+              "financialInstitutions": 437363600,
+              "individual": 11009825687,
+              "mutualFund": 1167164829,
+              "securitiesCompanies": 107560773,
+              "foundation": 72699960,
+              "other": 14381600,
+              "total": 16135449399
+            },
+            "foreign": {
+              "insurance": 635769338,
+              "corporate": 621878921,
+              "pensionFund": 4993879259,
+              "financialInstitutions": 2290139404,
+              "individual": 326607580,
+              "mutualFund": 21057048160,
+              "securitiesCompanies": 424505379,
+              "foundation": 329841005,
+              "other": 5638572675,
+              "total": 36318241721
+            },
+            "numberOfShareholders": 767281,
+            "changeInShareholders": -15416
+          },
+          {
+            "date": "2026-07-31",
+            "sharesNumber": 123275050000,
+            "local": {
+              "insurance": 2406061790,
+              "corporate": 639358985,
+              "pensionFund": 327545000,
+              "financialInstitutions": 437363600,
+              "individual": 11091661113,
+              "mutualFund": 1223560978,
+              "securitiesCompanies": 110263741,
+              "foundation": 73486060,
+              "other": 14283100,
+              "total": 16323584367
+            },
+            "foreign": {
+              "insurance": 651011685,
+              "corporate": 989616284,
+              "pensionFund": 4948602260,
+              "financialInstitutions": 2510683267,
+              "individual": 326311580,
+              "mutualFund": 20232370180,
+              "securitiesCompanies": 434821897,
+              "foundation": 299882405,
+              "other": 5736807195,
+              "total": 36130106753
+            },
+            "numberOfShareholders": 782697,
+            "changeInShareholders": -14418
+          },
+          {
+            "date": "2026-06-30",
+            "sharesNumber": 123275050000,
+            "local": {
+              "insurance": 2347930190,
+              "corporate": 676811585,
+              "pensionFund": 326033400,
+              "financialInstitutions": 437363600,
+              "individual": 11100401696,
+              "mutualFund": 1218211444,
+              "securitiesCompanies": 109436679,
+              "foundation": 73544460,
+              "other": 14203600,
+              "total": 16303936654
+            },
+            "foreign": {
+              "insurance": 551962796,
+              "corporate": 1223361552,
+              "pensionFund": 5139363015,
+              "financialInstitutions": 2811510529,
+              "individual": 326180480,
+              "mutualFund": 19268413209,
+              "securitiesCompanies": 558727363,
+              "foundation": 298788705,
+              "other": 5971446817,
+              "total": 36149754466
+            },
+            "numberOfShareholders": 797115,
+            "changeInShareholders": 29745
+          },
+          {
+            "date": "2026-05-29",
+            "sharesNumber": 123275050000,
+            "local": {
+              "insurance": 2233048535,
+              "corporate": 602033335,
+              "pensionFund": 314872400,
+              "financialInstitutions": 436320900,
+              "individual": 10600358384,
+              "mutualFund": 1162747459,
+              "securitiesCompanies": 117039473,
+              "foundation": 66741160,
+              "other": 12495900,
+              "total": 15545657546
+            },
+            "foreign": {
+              "insurance": 600834357,
+              "corporate": 1315044503,
+              "pensionFund": 5137965177,
+              "financialInstitutions": 2649194950,
+              "individual": 323497180,
+              "mutualFund": 19474983937,
+              "securitiesCompanies": 530018307,
+              "foundation": 300789505,
+              "other": 6575705658,
+              "total": 36908033574
+            },
+            "numberOfShareholders": 767370,
+            "changeInShareholders": 6009
+          },
+          {
+            "date": "2026-04-30",
+            "sharesNumber": 123275050000,
+            "local": {
+              "insurance": 2134470535,
+              "corporate": 550143385,
+              "pensionFund": 314025400,
+              "financialInstitutions": 405221200,
+              "individual": 10455503422,
+              "mutualFund": 1049437276,
+              "securitiesCompanies": 110571102,
+              "foundation": 66616060,
+              "other": 12124700,
+              "total": 15098113080
+            },
+            "foreign": {
+              "insurance": 632689751,
+              "corporate": 1567455984,
+              "pensionFund": 5317229610,
+              "financialInstitutions": 2308042861,
+              "individual": 323107480,
+              "mutualFund": 18975081971,
+              "securitiesCompanies": 425273036,
+              "foundation": 263514105,
+              "other": 7543183242,
+              "total": 37355578040
+            },
+            "numberOfShareholders": 761361,
+            "changeInShareholders": 46510
+          },
+          {
+            "date": "2026-03-31",
+            "sharesNumber": 123275050000,
+            "local": {
+              "insurance": 2125126585,
+              "corporate": 492578985,
+              "pensionFund": 309783800,
+              "financialInstitutions": 402714300,
+              "individual": 9820289938,
+              "mutualFund": 1019523518,
+              "securitiesCompanies": 60848952,
+              "foundation": 64525960,
+              "other": 7459100,
+              "total": 14302851138
+            },
+            "foreign": {
+              "insurance": 630807553,
+              "corporate": 1567042577,
+              "pensionFund": 5379818915,
+              "financialInstitutions": 2299031390,
+              "individual": 321460580,
+              "mutualFund": 19360076931,
+              "securitiesCompanies": 435865754,
+              "foundation": 255131605,
+              "other": 7901604677,
+              "total": 38150839982
+            },
+            "numberOfShareholders": 714851,
+            "changeInShareholders": 33548
+          },
+          {
+            "date": "2026-02-27",
+            "sharesNumber": 123275050000,
+            "local": {
+              "insurance": 2102283885,
+              "corporate": 475794625,
+              "pensionFund": 308561200,
+              "financialInstitutions": 448297688,
+              "individual": 9183728458,
+              "mutualFund": 972645499,
+              "securitiesCompanies": 100068349,
+              "foundation": 62647260,
+              "other": 3071100,
+              "total": 13657098064
+            },
+            "foreign": {
+              "insurance": 597854992,
+              "corporate": 2003004422,
+              "pensionFund": 5901485144,
+              "financialInstitutions": 2590032135,
+              "individual": 321640910,
+              "mutualFund": 17520869051,
+              "securitiesCompanies": 1085854729,
+              "foundation": 221474805,
+              "other": 8554376868,
+              "total": 38796593056
+            },
+            "numberOfShareholders": 681303,
+            "changeInShareholders": 41168
+          },
+          {
+            "date": "2026-01-30",
+            "sharesNumber": 123275050000,
+            "local": {
+              "insurance": 1881892485,
+              "corporate": 351703125,
+              "pensionFund": 306069700,
+              "financialInstitutions": 438000300,
+              "individual": 8765849210,
+              "mutualFund": 919002955,
+              "securitiesCompanies": 125496577,
+              "foundation": 62143760,
+              "other": 3008600,
+              "total": 12853166712
+            },
+            "foreign": {
+              "insurance": 562506971,
+              "corporate": 1734723454,
+              "pensionFund": 6153972781,
+              "financialInstitutions": 2488752147,
+              "individual": 321255710,
+              "mutualFund": 18187119949,
+              "securitiesCompanies": 1070741624,
+              "foundation": 193023405,
+              "other": 8888428367,
+              "total": 39600524408
+            },
+            "numberOfShareholders": 640135,
+            "changeInShareholders": 61958
+          }
+        ],
+        "latestSnapshot": {
+          "date": "2026-08-31",
+          "sharesNumber": 123275050000,
+          "local": {
+            "insurance": 2351378590,
+            "corporate": 650217360,
+            "pensionFund": 324857000,
+            "financialInstitutions": 437363600,
+            "individual": 11009825687,
+            "mutualFund": 1167164829,
+            "securitiesCompanies": 107560773,
+            "foundation": 72699960,
+            "other": 14381600,
+            "total": 16135449399
+          },
+          "foreign": {
+            "insurance": 635769338,
+            "corporate": 621878921,
+            "pensionFund": 4993879259,
+            "financialInstitutions": 2290139404,
+            "individual": 326607580,
+            "mutualFund": 21057048160,
+            "securitiesCompanies": 424505379,
+            "foundation": 329841005,
+            "other": 5638572675,
+            "total": 36318241721
+          },
+          "numberOfShareholders": 767281,
+          "changeInShareholders": -15416
+        }
+      },
+      "corporateActions": {
+        "ticker": "BBCA.JK",
+        "agm": [
+          {
+            "date": "2022-03-17",
+            "time": "09:00:00",
+            "place": "Menara Bca Grand Indonesia, Lantai 19Jl. M. H. Thamrin No. 1Jakarta Pusat 10310",
+            "result": null
+          },
+          {
+            "date": "2022-09-14",
+            "time": "10:00:00",
+            "place": "Pubex Live 2022",
+            "result": null
+          },
+          {
+            "date": "2023-03-16",
+            "time": "09:00:00",
+            "place": "Menara Bca Grand Indonesia, Lantai 19Jl. M. H. Thamrin No. 1Jakarta Pusat 10310",
+            "result": null
+          },
+          {
+            "date": "2023-11-29",
+            "time": "09:05:00",
+            "place": "Pubex Live 2023",
+            "result": null
+          },
+          {
+            "date": "2024-03-14",
+            "time": "09:30:00",
+            "place": "Menara Bca Grand Indonesia Jl. M. H. Thamrin No. 1Jakarta Pusat 10310",
+            "result": null
+          },
+          {
+            "date": "2024-08-28",
+            "time": "15:00:00",
+            "place": "IDX Public Expose",
+            "result": null
+          },
+          {
+            "date": "2025-03-12",
+            "time": "09:30:00",
+            "place": "Menara Bca, Grand Indonesia, Jl. M. H. Thamrin No. 1, Jakarta 10310 Kota Adm. Jakarta Pusat",
+            "result": null
+          },
+          {
+            "date": "2025-09-11",
+            "time": "16:00:00",
+            "place": "IDX Public Expose",
+            "result": null
+          },
+          {
+            "date": "2026-03-12",
+            "time": "14:00:00",
+            "place": "Menara Bca, Grand Indonesia Jl. M. H. Thamrin No. 1 Jakarta 10310 Kota Adm. Jakarta Pusat Dki. Jakarta",
+            "result": "Agenda #1: Shareholders approved the 2025 Annual Report and Financial Statements audited by PwC Indonesia and granted discharge to the Board of Directors and Commissioners.\nAgenda #2: The meeting approved the allocation of the 2025 net profit of Rp57,537,287,243,071, including a total cash dividend of Rp336 per share and the designation of remaining funds as retained earnings.\nAgenda #3: Shareholders authorized the Board of Commissioners and PT DWIMURIA INVESTAMA ANDALAN to determine the 2026 remuneration and 2025 bonuses for the Board of Directors and Commissioners.\nAgenda #4: PwC Indonesia and Eddy Rintis were appointed to audit the company's 2026 financial records, with the Board of Commissioners authorized to appoint replacements and determine honorariums.\nAgenda #5: The meeting approved a share buyback plan with a maximum budget of Rp5,000,000,000,000 and authorized the Board of Directors to execute the process and determine pricing.\nAgenda #6: Shareholders approved amendments to the Company's Articles of Association and authorized the Board of Directors to execute all necessary legal actions and notary deeds.\nAgenda #7: The meeting confirmed the end of current board terms and appointed the Board of Commissioners and Directors for the 2026-2029 period, including Jahja Setiaatmadja as President Commissioner and David Formula as a new Director.\nAgenda #8: The meeting held on March 12, 2026, was declared valid with an attendance of 87.5944% of total shares."
+          }
+        ],
+        "dividends": [
+          {
+            "exDate": "2026-08-31",
+            "paymentDate": "2026-09-16",
+            "dividendYield": null,
+            "dividendAmount": 25
+          },
+          {
+            "exDate": "2026-03-30",
+            "paymentDate": "2026-04-08",
+            "dividendYield": null,
+            "dividendAmount": 281
+          },
+          {
+            "exDate": "2024-03-25",
+            "paymentDate": "2024-04-04",
+            "dividendYield": 0.0227933,
+            "dividendAmount": 227.5
+          },
+          {
+            "exDate": "2024-11-21",
+            "paymentDate": "2024-12-11",
+            "dividendYield": 0.00500951,
+            "dividendAmount": 50
+          },
+          {
+            "exDate": "2020-12-08",
+            "paymentDate": "2020-12-22",
+            "dividendYield": 0.00325659,
+            "dividendAmount": 19.6
+          },
+          {
+            "exDate": "2026-06-17",
+            "paymentDate": "2026-06-26",
+            "dividendYield": null,
+            "dividendAmount": 20
+          },
+          {
+            "exDate": "2025-12-03",
+            "paymentDate": "2025-12-22",
+            "dividendYield": 0.00641717,
+            "dividendAmount": 55
+          },
+          {
+            "exDate": "2025-03-21",
+            "paymentDate": "2025-04-11",
+            "dividendYield": 0.0291689,
+            "dividendAmount": 250
+          },
+          {
+            "exDate": "2023-12-04",
+            "paymentDate": "2023-12-20",
+            "dividendYield": 0.00476727,
+            "dividendAmount": 42.5
+          },
+          {
+            "exDate": "2023-03-29",
+            "paymentDate": "2023-04-14",
+            "dividendYield": 0.0190691,
+            "dividendAmount": 170
+          },
+          {
+            "exDate": "2022-12-02",
+            "paymentDate": "2022-12-20",
+            "dividendYield": 0.00437328,
+            "dividendAmount": 35
+          },
+          {
+            "exDate": "2022-03-28",
+            "paymentDate": "2022-04-19",
+            "dividendYield": 0.0149941,
+            "dividendAmount": 120
+          },
+          {
+            "exDate": "2021-11-17",
+            "paymentDate": "2021-12-07",
+            "dividendYield": 0.00371546,
+            "dividendAmount": 25
+          },
+          {
+            "exDate": "2021-04-08",
+            "paymentDate": "2021-04-28",
+            "dividendYield": 0.0128406,
+            "dividendAmount": 86.4
+          },
+          {
+            "exDate": "2020-04-21",
+            "paymentDate": "2020-05-11",
+            "dividendYield": 0.0151199,
+            "dividendAmount": 91
+          }
+        ],
+        "stockSplits": [
+          {
+            "date": "2021-10-13",
+            "splitRatio": 5
+          }
+        ],
+        "bonus": null,
+        "warrant": null,
+        "rightIssue": null,
+        "upcomingDividend": null
+      }
+    }
+  },
+  "ownershipByTicker": {
+    "BBCA.JK": {
+      "ticker": "BBCA.JK",
+      "companyName": "PT Bank Central Asia Tbk.",
+      "holders": [
+        {
+          "name": "PT Dwimuria Investama Andalan",
+          "shareValue": 426698685000000,
+          "shareAmount": 67729950000,
+          "sharePercentage": 0.54942
+        },
+        {
+          "name": "Public",
+          "shareValue": 346697981645400,
+          "shareAmount": 55031425658,
+          "sharePercentage": 0.44642
+        },
+        {
+          "name": "Treasury Stock",
+          "shareValue": 2729781810000,
+          "shareAmount": 433298700,
+          "sharePercentage": 0.00351
+        },
+        {
+          "name": "Jahja Setiaatmadja",
+          "shareValue": 225557010000,
+          "shareAmount": 35802700,
+          "sharePercentage": 0.0003
+        },
+        {
+          "name": "Tan Ho Hien/Subur Disebut Juga Subur Tan",
+          "shareValue": 74264412600,
+          "shareAmount": 11788002,
+          "sharePercentage": 0.0001
+        },
+        {
+          "name": "Tonny Kusnadi",
+          "shareValue": 49265685000,
+          "shareAmount": 7819950,
+          "sharePercentage": 6e-05
+        },
+        {
+          "name": "Vera Eve Lim",
+          "shareValue": 20673198000,
+          "shareAmount": 3281460,
+          "sharePercentage": 3e-05
+        },
+        {
+          "name": "Lianawaty Suwono",
+          "shareValue": 24609324600,
+          "shareAmount": 3906242,
+          "sharePercentage": 3e-05
+        },
+        {
+          "name": "Santoso",
+          "shareValue": 23713590600,
+          "shareAmount": 3764062,
+          "sharePercentage": 3e-05
+        },
+        {
+          "name": "Armand Wahyudi Hartono",
+          "shareValue": 26813209500,
+          "shareAmount": 4256065,
+          "sharePercentage": 3e-05
+        },
+        {
+          "name": "Frengky Chandra Kusuma",
+          "shareValue": 17866270800,
+          "shareAmount": 2835916,
+          "sharePercentage": 2e-05
+        },
+        {
+          "name": "Gregory Hendra Lembong",
+          "shareValue": 16801602300,
+          "shareAmount": 2666921,
+          "sharePercentage": 2e-05
+        }
+      ],
+      "whaleInvestors": [
+        "Anthoni Salim"
+      ],
+      "conglomeratesGroup": [
+        "Djarum Group"
+      ],
+      "asOf": null
+    }
+  },
+  "searches": {
+    "ticker-BBCA": {
+      "results": [
+        {
+          "ticker": "BBCA.JK",
+          "companyName": "PT Bank Central Asia Tbk."
+        }
+      ],
+      "totalCount": 1,
+      "hasMore": false,
+      "nextOffset": null
+    },
+    "no-results": {
+      "results": [],
+      "totalCount": 0,
+      "hasMore": false,
+      "nextOffset": null
+    }
+  },
+  "traceVerifications": {
+    "shareholder-Dwimuria-in-BBCA": {
+      "results": [
+        {
+          "status": "confirmed",
+          "ticker": "BBCA.JK",
+          "screenerName": "PT Dwimuria Investama Andalan",
+          "ownershipName": "PT Dwimuria Investama Andalan",
+          "sharePercentage": 0.54942,
+          "shareAmount": 67729950000
+        }
+      ],
+      "processed": 1,
+      "limited": false,
+      "maxBatch": 5
+    }
+  }
+}
