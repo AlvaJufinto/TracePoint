@@ -991,20 +991,7 @@ function Investigation({ ticker }: { ticker: string }) {
 
 	return (
 		<div className="min-w-0">
-			<nav
-				aria-label="Investigation navigation"
-				className="mb-5 flex flex-wrap items-center gap-2 text-sm text-[var(--color-muted)]"
-			>
-				<Link to={searchLink} className="underline">
-					Back to search results
-				</Link>
-				<span aria-hidden="true">/</span>
-				<span aria-current="page">{ticker}</span>
-			</nav>
-			<header className="mb-6 border-b border-[var(--color-border)] pb-5">
-				<p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)]">
-					Investigating
-				</p>
+			<header className="mb-6">
 				<div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
 					<h1 className="text-3xl font-bold">{ticker.replace(/\.JK$/, "")}</h1>
 					<p className="text-base">
@@ -1045,10 +1032,6 @@ function Investigation({ ticker }: { ticker: string }) {
 						. Inspect this company’s report to continue.
 					</p>
 				)}
-				<p className="mt-3 text-xs text-[var(--color-muted)]">
-					Reported by Sectors · Ownership date unavailable · Coverage may be
-					incomplete
-				</p>
 			</header>
 
 			<div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">

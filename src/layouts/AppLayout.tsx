@@ -3,35 +3,37 @@
 import { Search } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
-import LogoNav from "../assets/logo/logo-nav.png";
+import BrandLogo from "../components/BrandLogo";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
 	const location = useLocation();
 	const pathname = location.pathname;
 
 	const isLanding = pathname === "/";
+	const isTrace = pathname === "/trace";
 	const showNav = !isLanding;
 
 	return (
 		<div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-primary)] font-sans">
 			{showNav && (
-				<header className="sticky top-0 z-30 border-b border-white/10 bg-[var(--color-primary)]/80 backdrop-blur-md backdrop-saturate-150">
+				<header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-white/90 shadow-sm backdrop-blur-xl">
 					<div className="mx-auto flex max-w-[1400px] items-center justify-between px-4 py-3 sm:px-6">
-						<Link to="/" className="group inline-flex items-center gap-2">
-							<img
-								src={LogoNav}
-								alt="TracePoint"
-								className="h-8 transition-opacity group-hover:opacity-80"
-							/>
-						</Link>
-
 						<Link
-							to="/search"
-							className="inline-flex items-center gap-1 rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-4 py-1.5 text-sm font-bold text-[var(--color-primary)] shadow-sm transition-all hover:opacity-90 hover:shadow-md active:scale-[0.98]"
+							to="/"
+							aria-label="TracePoint home"
+							className="group inline-flex items-center"
 						>
-							<Search size={14} />
-							New search
+							<BrandLogo className="text-xl text-[var(--color-primary)] transition-opacity group-hover:opacity-70" />
 						</Link>
+						{isTrace && (
+							<Link
+								to="/search"
+								className="inline-flex items-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-[var(--color-primary)] transition-opacity hover:opacity-80"
+							>
+								<Search aria-hidden="true" size={15} />
+								Search
+							</Link>
+						)}
 					</div>
 				</header>
 			)}
@@ -56,18 +58,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 						<div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
 							{/* Brand */}
 							<div className="flex items-center gap-3">
-								<img
-									src="/src/assets/logo/logo-square.png"
-									alt="TracePoint"
-									className="h-9 w-9 rounded-lg object-contain"
-								/>
+								<BrandLogo iconOnly className="text-3xl" />
 
 								<div className="flex flex-col">
 									<span className="text-sm font-semibold text-[var(--color-surface)]">
 										TracePoint
-									</span>
-									<span className="text-xs text-[var(--color-surface)]">
-										Ownership relationship explorer
 									</span>
 								</div>
 							</div>

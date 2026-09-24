@@ -87,9 +87,6 @@ function SearchForm({
 		"/search?" + new URLSearchParams({ q: submitted, mode: searchMode });
 	return (
 		<div className="mx-auto max-w-2xl py-4 sm:py-8 min-h-[800px]">
-			<p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)]">
-				Start an investigation
-			</p>
 			<h1 className="text-3xl font-bold">Find a company</h1>
 			<p className="mt-3 text-[var(--color-muted)]">
 				Search Indonesian listed companies, then inspect their reported
@@ -242,12 +239,6 @@ function SearchForm({
 							</p>
 						)}
 					</>
-				)}
-				{!submitted && (
-					<p className="border-t border-[var(--color-border)] py-8 text-sm text-[var(--color-muted)]">
-						Select a company to see its shareholders, inspect a relationship,
-						and trace a shareholder to other companies.
-					</p>
 				)}
 			</section>
 		</div>
