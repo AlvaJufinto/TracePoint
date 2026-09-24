@@ -140,7 +140,7 @@ function SearchForm({
 				</p>
 				<div className="mt-4 flex flex-wrap items-center gap-2">
 					<span className="text-xs text-[var(--color-muted)]">Try</span>
-					{["BBCA", "BREN", "ADRO", "AMMN", "TLKM"].map((ticker) => (
+					{["BBCA"].map((ticker) => (
 						<button
 							key={ticker}
 							type="button"

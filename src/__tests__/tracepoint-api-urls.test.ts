@@ -15,6 +15,9 @@ import {
 
 const requestedUrls: string[] = [];
 
+(globalThis as typeof globalThis & { __TRACEPOINT_DATA_SOURCE__?: string })
+  .__TRACEPOINT_DATA_SOURCE__ = 'live';
+
 globalThis.fetch = (async (input: string | URL | Request) => {
   requestedUrls.push(String(input));
   return new Response('{}', {
