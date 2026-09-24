@@ -21,18 +21,6 @@ import {
 	isTracePointScreenerResponse,
 	isTraceVerification,
 } from "../lib/guards";
-import {
-	fixturesEnabled,
-	getFixtureCompanyManagement,
-	getFixtureCompanyOverview,
-	getFixtureCompanyOwnership,
-	getFixtureComposition,
-	getFixtureCorporateActions,
-	getFixtureFreeFloat,
-	searchFixtureByShareholderName,
-	searchFixtureCompanies,
-	verifyFixtureCandidates,
-} from "./fixture-api";
 import type {
 	PanelState,
 	TraceCandidate,
@@ -101,8 +89,6 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
 export async function getCompanyOverview(
 	ticker: string,
 ): Promise<TracePointCompany> {
-	if (fixturesEnabled()) return getFixtureCompanyOverview(ticker);
-
 	const data = await apiFetch<TracePointCompany>(
 		`/company-overview?ticker=${encodeURIComponent(ticker)}`,
 	);
@@ -115,8 +101,6 @@ export async function getCompanyOverview(
 export async function getCompanyOwnership(
 	ticker: string,
 ): Promise<TracePointOwnershipSnapshot> {
-	if (fixturesEnabled()) return getFixtureCompanyOwnership(ticker);
-
 	const data = await apiFetch<TracePointOwnershipSnapshot>(
 		`/company-ownership?ticker=${encodeURIComponent(ticker)}`,
 	);
@@ -129,8 +113,6 @@ export async function getCompanyOwnership(
 export async function getCompanyManagement(
 	ticker: string,
 ): Promise<TracePointManagement> {
-	if (fixturesEnabled()) return getFixtureCompanyManagement(ticker);
-
 	const data = await apiFetch<TracePointManagement>(
 		`/company-management?ticker=${encodeURIComponent(ticker)}`,
 	);
@@ -153,8 +135,6 @@ export async function searchCompanies(
 	query: string,
 	options?: { where?: string; limit?: number; offset?: number; signal?: AbortSignal },
 ): Promise<TracePointScreenerResponse> {
-	if (fixturesEnabled()) return searchFixtureCompanies(query);
-
 	const params = new URLSearchParams();
 	if (options?.where) {
 		params.set("where", options.where);
@@ -182,8 +162,6 @@ export async function searchByShareholderName(
 	limit = 50,
 	signal?: AbortSignal,
 ): Promise<TracePointScreenerResponse> {
-	if (fixturesEnabled()) return searchFixtureByShareholderName(shareholderName);
-
 	const escaped = shareholderName.replace(/'/g, "''");
 	const where = `major_shareholders_name like '%${escaped}%'`;
 	return searchCompanies("", { where, limit, signal });
@@ -209,10 +187,6 @@ export async function verifyTraceCandidates(
 	request: TraceVerifyRequest,
 	signal?: AbortSignal,
 ): Promise<TraceVerifyResponse> {
-	if (fixturesEnabled()) {
-		return verifyFixtureCandidates(request.candidates, request.maxBatch);
-	}
-
 	const data = await apiFetch<TraceVerifyResponse>("/trace-verify", {
 		method: "POST",
 		body: JSON.stringify(request),
@@ -236,8 +210,6 @@ export async function verifyTraceCandidates(
 export async function getFreeFloat(
 	ticker: string,
 ): Promise<TracePointFreeFloat> {
-	if (fixturesEnabled()) return getFixtureFreeFloat(ticker);
-
 	const data = await apiFetch<TracePointFreeFloat>(
 		`/company-free-float?ticker=${encodeURIComponent(ticker)}`,
 	);
@@ -254,8 +226,6 @@ export async function getFreeFloat(
 export async function getShareholderComposition(
 	ticker: string,
 ): Promise<TracePointComposition> {
-	if (fixturesEnabled()) return getFixtureComposition(ticker);
-
 	const data = await apiFetch<TracePointComposition>(
 		`/company-composition?ticker=${encodeURIComponent(ticker)}`,
 	);
@@ -272,8 +242,6 @@ export async function getShareholderComposition(
 export async function getCorporateActions(
 	ticker: string,
 ): Promise<TracePointCorporateActions> {
-	if (fixturesEnabled()) return getFixtureCorporateActions(ticker);
-
 	const data = await apiFetch<TracePointCorporateActions>(
 		`/company-corporate-actions?ticker=${encodeURIComponent(ticker)}`,
 	);
