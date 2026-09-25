@@ -32,7 +32,7 @@ import {
 	getShareholderComposition,
 	searchByShareholderName,
 	verifyTraceCandidates,
-} from "../lib/tracepoint-api";
+} from "../lib/trace-data-api";
 import type {
 	GraphNode,
 	MetadataEdge,
