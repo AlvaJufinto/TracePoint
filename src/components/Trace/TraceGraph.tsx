@@ -22,6 +22,7 @@ import {
 import Detail from "./Detail";
 import FitWhenReady from "./FitWhenReady";
 import PanelFeedback from "./PanelFeedback";
+import Skeleton from "../Skeleton";
 import { CustomEntityNode, OwnershipLine } from "./TraceGraphPrimitives";
 
 const nodeTypes = { customEntity: CustomEntityNode };
@@ -108,8 +109,24 @@ export default function TraceGraph({
 							</div>
 						</div>
 					) : !reactFlowNodes.length ? (
-						<div className="flex h-full items-center justify-center">
-							<p role="status">Arranging ownership graph…</p>
+						<div className="flex h-full items-center justify-center p-6">
+							<div className="w-full max-w-lg space-y-4">
+								<div className="flex items-center justify-center gap-4">
+									<Skeleton className="h-20 w-20 rounded-full" />
+									<div className="h-px w-12 bg-[var(--color-border)]" />
+									<Skeleton className="h-16 w-16 rounded-full" />
+									<div className="h-px w-12 bg-[var(--color-border)]" />
+									<Skeleton className="h-14 w-14 rounded-full" />
+								</div>
+								<div className="flex items-center justify-center gap-2">
+									<Skeleton className="h-10 w-10 rounded-full" />
+									<div className="h-px w-8 bg-[var(--color-border)]" />
+									<Skeleton className="h-12 w-12 rounded-full" />
+								</div>
+								<p role="status" className="text-center text-sm text-[var(--color-muted)]">
+									Arranging ownership graph…
+								</p>
+							</div>
 						</div>
 					) : (
 						<ReactFlow

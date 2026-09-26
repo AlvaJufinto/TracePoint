@@ -45,6 +45,7 @@ export default function TraceHeader({
 				state={company}
 				label="company details"
 				retry={retryCompany}
+				variant="text"
 			/>
 
 			{continuedName && (

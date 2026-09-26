@@ -2,8 +2,10 @@
 
 import { type FormEvent, useEffect, useState } from "react";
 
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
+
+import Skeleton from "../components/Skeleton";
 
 import {
 	getCompanyOverview,
@@ -154,10 +156,20 @@ function SearchForm({
 			</form>
 			<section aria-live="polite" aria-busy={loading}>
 				{loading && (
-					<p role="status" className="flex items-center gap-3 py-8">
-						<Loader2 className="animate-spin" size={18} /> Searching{" "}
-						{searchMode === "company" ? "companies" : "shareholder candidates"}…
-					</p>
+					<div className="divide-y divide-[var(--color-border)] border-y border-[var(--color-border)]">
+						{[1, 2, 3].map((i) => (
+							<div key={i} className="flex items-center justify-between gap-4 bg-white p-4">
+								<div className="min-w-0 space-y-2">
+									<Skeleton className="h-5 w-16" />
+									<Skeleton className="h-4 w-40" />
+									{searchMode === "shareholder" && (
+										<Skeleton className="h-4 w-32" />
+									)}
+								</div>
+								<Skeleton className="h-5 w-20" />
+							</div>
+						))}
+					</div>
 				)}
 				{error && (
 					<div

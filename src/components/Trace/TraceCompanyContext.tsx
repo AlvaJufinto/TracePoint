@@ -297,6 +297,7 @@ export default function TraceCompanyContext({
 						state={freeFloat}
 						label="free float"
 						retry={() => retry("freeFloat")}
+						variant="value"
 					/>
 
 					{freeFloat.status === "success" && (
@@ -323,6 +324,7 @@ export default function TraceCompanyContext({
 							state={management}
 							label="management"
 							retry={() => retry("management")}
+							variant="list"
 						/>
 
 						{management.data?.keyExecutives.length ? (
@@ -352,6 +354,7 @@ export default function TraceCompanyContext({
 						state={composition}
 						label="composition"
 						retry={() => retry("composition")}
+						variant="chart"
 					/>
 
 					{composition.status === "success" && !latest && (
@@ -399,6 +402,7 @@ export default function TraceCompanyContext({
 						state={corporateActions}
 						label="corporate actions"
 						retry={() => retry("corporateActions")}
+						variant="actions"
 					/>
 
 					{corporateActions.data && (
