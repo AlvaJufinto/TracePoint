@@ -1,3 +1,5 @@
+/** @format */
+
 export function formatShares(amount: number | null | undefined): string {
 	if (amount == null || !Number.isFinite(amount)) {
 		return "Not available";
@@ -25,5 +27,5 @@ export function formatShares(amount: number | null | undefined): string {
 export function percentage(value: number | null | undefined): string {
 	return value == null || !Number.isFinite(value)
 		? "Not available"
-		: `${(value * 100).toFixed(3)}%`;
+		: `${(value * 100).toFixed(4)}%`;
 }
