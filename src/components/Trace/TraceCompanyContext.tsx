@@ -32,24 +32,27 @@ const categoryLabels: Record<string, string> = {
 };
 
 const investorCategoryColors: Record<string, string> = {
-	individual: "#76b900",
-	institutional: "#5a8d00",
-	corporate: "#bff230",
-	government: "#952fc6",
-	fund: "#4d1368",
-	employee: "#df6500",
-	other: "#0046a4",
+	mutualFund: "#76b900",
+	individual: "#0046a4",
+	other: "#898989",
+	pensionFund: "#952fc6",
+	insurance: "#df6500",
+	financialInstitutions: "#00a6a6",
+	corporate: "#d4a72c",
+	securitiesCompanies: "#7a4eab",
+	foundation: "#b34d6f",
 };
 
 const fallbackChartColors = [
 	"#76b900",
-	"#5a8d00",
-	"#bff230",
-	"#952fc6",
-	"#4d1368",
-	"#df6500",
-	"#ef9100",
 	"#0046a4",
+	"#898989",
+	"#952fc6",
+	"#df6500",
+	"#00a6a6",
+	"#d4a72c",
+	"#7a4eab",
+	"#b34d6f",
 ];
 
 const chartColors = {
@@ -100,8 +103,13 @@ function LocalForeignComparison({
 		);
 	}
 
-	const localWidth = (localPercentage ?? 0) * 100;
-	const foreignWidth = (foreignPercentage ?? 0) * 100;
+	const comparisonTotal = (localPercentage ?? 0) + (foreignPercentage ?? 0);
+
+	const localComparison =
+		comparisonTotal > 0 ? (localPercentage ?? 0) / comparisonTotal : 0;
+
+	const foreignComparison =
+		comparisonTotal > 0 ? (foreignPercentage ?? 0) / comparisonTotal : 0;
 
 	return (
 		<div className="mt-5">
@@ -127,25 +135,22 @@ function LocalForeignComparison({
 				</div>
 			</div>
 
-			<div className="relative mt-4 h-16 w-full overflow-hidden">
-				<div className="absolute inset-0 flex items-center">
+			<div className="relative mt-5 h-10 overflow-hidden">
+				<div className="absolute inset-0 flex">
 					<div
-						className="h-12 bg-[var(--color-primary)]"
+						className="h-full bg-[var(--color-primary)]"
 						style={{
-							width: `${localWidth / 2}%`,
-							marginLeft: `${50 - localWidth / 2}%`,
+							width: `${localComparison * 100}%`,
 						}}
 					/>
 
 					<div
-						className="h-12 bg-[var(--color-accent)]"
+						className="h-full bg-[var(--color-accent)]"
 						style={{
-							width: `${foreignWidth / 2}%`,
+							width: `${foreignComparison * 100}%`,
 						}}
 					/>
 				</div>
-
-				<div className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-white" />
 			</div>
 
 			<div className="mt-2 grid grid-cols-2 gap-4 text-[10px] text-[var(--color-muted)]">
@@ -155,6 +160,10 @@ function LocalForeignComparison({
 					{foreign?.toLocaleString() ?? "Not available"} shares
 				</span>
 			</div>
+
+			<p className="mt-2 text-center text-[10px] text-[var(--color-muted)]">
+				Comparison of reported local and foreign shares
+			</p>
 		</div>
 	);
 }
@@ -178,7 +187,8 @@ function InvestorCategoryPieChart({
 				value: localValue + foreignValue,
 			};
 		})
-		.filter((category) => category.value > 0);
+		.filter((category) => category.value > 0)
+		.sort((a, b) => b.value - a.value);
 
 	const total = categories.reduce((sum, category) => sum + category.value, 0);
 
