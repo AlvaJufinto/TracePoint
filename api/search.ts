@@ -2,14 +2,14 @@
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import { sectorsFetch, SectorsApiError } from "./_lib/sectors-fetch";
+import { sectorsFetch, SectorsApiError } from "./_lib/sectors-fetch.js";
 import {
 	checkRateLimit,
 	errorResponse,
 	getClientIp,
 	rateLimitResponse,
 	successResponse,
-} from "./_lib/server";
+} from "./_lib/server.js";
 
 export const config = { runtime: "nodejs" };
 const SEARCH_HANDLER_VERSION = "2026-09-24.2";

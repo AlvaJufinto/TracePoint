@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sectorsFetch, isValidTicker } from './_lib/sectors-fetch';
-import { checkTraceLimit, errorResponse, getClientIp, successResponse, isNonTraceableShareholder } from './_lib/server';
-import type { TraceCandidate, TraceVerification } from '../src/types/tracepoint';
+import { sectorsFetch, isValidTicker } from './_lib/sectors-fetch.js';
+import { checkTraceLimit, errorResponse, getClientIp, successResponse, isNonTraceableShareholder } from './_lib/server.js';
+import type { TraceCandidate, TraceVerification } from '../src/types/tracepoint.js';
 
 export const config = { runtime: 'nodejs' };
 const normalizeName = (name: string) => name.trim().replace(/\s+/g, ' ').toLowerCase();

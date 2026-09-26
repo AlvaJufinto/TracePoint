@@ -6,14 +6,14 @@ import {
 	isValidTicker,
 	normalizeTicker,
 	sectorsFetch,
-} from "./_lib/sectors-fetch";
+} from "./_lib/sectors-fetch.js";
 import {
 	checkRateLimit,
 	errorResponse,
 	getClientIp,
 	rateLimitResponse,
 	successResponse,
-} from "./_lib/server";
+} from "./_lib/server.js";
 
 export const config = { runtime: "nodejs" };
 

@@ -1,7 +1,7 @@
 /** @format */
 
-import { getOrSet } from "./cache";
-import { getSectorsApiKey } from "./sectors-key";
+import { getOrSet } from "./cache.js";
+import { getSectorsApiKey } from "./sectors-key.js";
 
 const SECTORS_BASE = "https://api.sectors.app/v2";
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
