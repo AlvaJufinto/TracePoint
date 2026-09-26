@@ -133,7 +133,9 @@ export default function TraceGraph({
 							onPaneClick={clearSelection}
 							nodeTypes={nodeTypes}
 							nodesConnectable={false}
-							nodesDraggable={false}
+							panOnDrag={[0]}
+							selectionOnDrag={false}
+							nodesDraggable
 							deleteKeyCode={null}
 							minZoom={0.1}
 							maxZoom={1.5}

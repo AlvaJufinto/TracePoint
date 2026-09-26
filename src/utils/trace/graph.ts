@@ -543,7 +543,7 @@ export async function layoutGraph(
 				shareCategory,
 			},
 
-			draggable: false,
+			draggable: true,
 			selectable: true,
 		};
 	});
