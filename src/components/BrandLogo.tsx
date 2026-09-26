@@ -1,3 +1,5 @@
+/** @format */
+
 type BrandLogoProps = {
 	className?: string;
 	variant?: "black" | "white";
