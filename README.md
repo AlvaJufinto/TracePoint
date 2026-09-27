@@ -1,4 +1,6 @@
-![TracePoint](https://tracepoint-gamma.vercel.app/black-logo.png)
+<!-- @format -->
+
+![TracePoint](https://tracepoint-gamma.vercel.app/white-logo.png)
 
 # TracePoint
 
@@ -245,12 +247,12 @@ my-app/
 
 ## Application Routes
 
-| Route | Purpose |
-|-------|---------|
-| `/` | Landing page with brief product description and entry point to search. |
-| `/search` | Search page for companies or shareholders. Accepts `q` and `mode` query parameters. |
-| `/trace` | Company workspace and ownership graph. Accepts `ticker`, optional `shareholder`, `from`, `via`, and `returnTo` query parameters. |
-| `*` | Not-found page. |
+| Route     | Purpose                                                                                                                          |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `/`       | Landing page with brief product description and entry point to search.                                                           |
+| `/search` | Search page for companies or shareholders. Accepts `q` and `mode` query parameters.                                              |
+| `/trace`  | Company workspace and ownership graph. Accepts `ticker`, optional `shareholder`, `from`, `via`, and `returnTo` query parameters. |
+| `*`       | Not-found page.                                                                                                                  |
 
 Search results link to `/trace` with the selected ticker and the current search URL as `returnTo`.
 
