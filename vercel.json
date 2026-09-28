@@ -1,5 +1,10 @@
 {
 	"version": 2,
 	"devCommand": "node node_modules/vite/bin/vite.js --host 127.0.0.1 --port $PORT --strictPort",
-	"source": "/((?!api/|src/|node_modules/|@|.\\..).*)"
+	"rewrites": [
+		{
+			"source": "/((?!api/|src/|node_modules/|@|.*\\..*).*)",
+			"destination": "/index.html"
+		}
+	]
 }
