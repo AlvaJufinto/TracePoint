@@ -2,7 +2,11 @@
 
 import { X } from "lucide-react";
 import { Link } from "react-router-dom";
-import ReactFlow, { type ReactFlowInstance } from "reactflow";
+import ReactFlow, {
+	Background,
+	BackgroundVariant,
+	type ReactFlowInstance,
+} from "reactflow";
 
 import type { EntityNode } from "../../interfaces/trace";
 import type {
@@ -19,10 +23,9 @@ import {
 	isNonTraceableShareholder,
 	toReactFlowEdges,
 } from "../../utils/trace/graph";
-import Detail from "./Detail";
-import FitWhenReady from "./FitWhenReady";
-import PanelFeedback from "./PanelFeedback";
 import Skeleton from "../Skeleton";
+import Detail from "./Detail";
+import PanelFeedback from "./PanelFeedback";
 import { CustomEntityNode, OwnershipLine } from "./TraceGraphPrimitives";
 
 const nodeTypes = { customEntity: CustomEntityNode };
@@ -77,20 +80,24 @@ export default function TraceGraph({
 					retry={retryOwnership}
 				/>
 			</div>
+
 			{ownership.status === "success" && !ownership.data?.holders.length && (
 				<div className="p-6">
 					<h3 className="text-base font-bold">
 						No ownership records available
 					</h3>
+
 					<p className="mt-2 text-sm text-[var(--color-muted)]">
 						Sectors did not return shareholder records for this company.
 						Supporting context may still be available below.
 					</p>
+
 					<Link to={searchLink} className="mt-4 inline-block underline">
 						Search another company
 					</Link>
 				</div>
 			)}
+
 			{ownership.data && ownership.data.holders.length > 0 && (
 				<div className="relative h-[80vh] overflow-hidden">
 					{layoutError ? (
@@ -100,6 +107,7 @@ export default function TraceGraph({
 									Graph layout could not be loaded. Ownership records remain
 									available.
 								</p>
+
 								<button
 									className="mt-4 min-h-11 border px-4"
 									onClick={retryOwnership}
@@ -113,17 +121,28 @@ export default function TraceGraph({
 							<div className="w-full max-w-lg space-y-4">
 								<div className="flex items-center justify-center gap-4">
 									<Skeleton className="h-20 w-20 rounded-full" />
+
 									<div className="h-px w-12 bg-[var(--color-border)]" />
+
 									<Skeleton className="h-16 w-16 rounded-full" />
+
 									<div className="h-px w-12 bg-[var(--color-border)]" />
+
 									<Skeleton className="h-14 w-14 rounded-full" />
 								</div>
+
 								<div className="flex items-center justify-center gap-2">
 									<Skeleton className="h-10 w-10 rounded-full" />
+
 									<div className="h-px w-8 bg-[var(--color-border)]" />
+
 									<Skeleton className="h-12 w-12 rounded-full" />
 								</div>
-								<p role="status" className="text-center text-sm text-[var(--color-muted)]">
+
+								<p
+									role="status"
+									className="text-center text-sm text-[var(--color-muted)]"
+								>
 									Arranging ownership graph…
 								</p>
 							</div>
@@ -157,38 +176,52 @@ export default function TraceGraph({
 							minZoom={0.1}
 							maxZoom={1.5}
 							fitView
-							fitViewOptions={{ padding: 0.12, minZoom: 0.1, maxZoom: 1 }}
+							fitViewOptions={{
+								padding: 0.12,
+								minZoom: 0.1,
+								maxZoom: 1,
+							}}
 							className="bg-[var(--color-surface)]"
 						>
-							<FitWhenReady />
+							<Background
+								variant={BackgroundVariant.Lines}
+								gap={60}
+								size={2}
+								color="#9C9C9C17"
+							/>
+
+							<div className="absolute bottom-4 left-4 z-10 flex flex-col gap-2 border border-[var(--color-border)] bg-white/95 px-3 py-2 shadow-sm sm:flex-row sm:items-center sm:gap-4">
+								<span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
+									Legend
+								</span>
+
+								<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-primary)]">
+									<span className="h-2.5 w-2.5 rounded-full border border-[var(--color-primary)] bg-[var(--color-accent)]" />
+									Major
+								</div>
+
+								<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)]">
+									<span className="h-2.5 w-2.5 rounded-full border border-[var(--color-border-strong)] bg-[var(--color-surface)]" />
+									Corporate
+								</div>
+
+								<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)]">
+									<span className="h-2.5 w-2.5 rounded-full border border-[var(--color-border)] bg-white" />
+									Minority
+								</div>
+
+								<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)]">
+									<span className="h-2.5 w-2.5 rounded-full border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface)]" />
+									Aggregate
+								</div>
+
+								<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)]">
+									<span className="w-5 border-t border-dashed border-[var(--color-border-strong)]" />
+									Context
+								</div>
+							</div>
 						</ReactFlow>
 					)}
-
-					<div className="pointer-events-none absolute bottom-4 left-4 z-10 hidden items-center gap-3 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white/95 px-3 py-2 shadow-sm sm:flex">
-						<span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
-							Legend
-						</span>
-						<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-primary)]">
-							<span className="h-2.5 w-2.5 rounded-full border border-[var(--color-primary)] bg-[var(--color-accent)]" />
-							Major
-						</div>
-						<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)]">
-							<span className="h-2.5 w-2.5 rounded-full border border-[var(--color-border-strong)] bg-[var(--color-surface)]" />
-							Corporate
-						</div>
-						<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)]">
-							<span className="h-2.5 w-2.5 rounded-full border border-[var(--color-border)] bg-white" />
-							Minority
-						</div>
-						<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)]">
-							<span className="h-2.5 w-2.5 rounded-full border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface)]" />
-							Aggregate
-						</div>
-						<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)]">
-							<span className="w-5 border-t border-dashed border-[var(--color-border-strong)]" />
-							Context
-						</div>
-					</div>
 
 					{selected && (
 						<div className="absolute right-4 top-4 z-10 w-[min(360px,calc(100%-2rem))] rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white shadow-sm">
@@ -201,6 +234,7 @@ export default function TraceGraph({
 												? "Conglomerate metadata"
 												: selected.type}
 									</p>
+
 									<h3 className="mt-1 break-words text-base font-bold">
 										{holder?.name ||
 											(selected.type === "company"
@@ -208,6 +242,7 @@ export default function TraceGraph({
 												: selected.label)}
 									</h3>
 								</div>
+
 								<button
 									aria-label="Close inspector"
 									onClick={closeInspector}
@@ -216,6 +251,7 @@ export default function TraceGraph({
 									<X size={18} />
 								</button>
 							</div>
+
 							<div className="max-h-[420px] overflow-y-auto p-4">
 								{holder ? (
 									<>
@@ -224,6 +260,7 @@ export default function TraceGraph({
 												label={"Ownership in " + ticker}
 												value={percentage(holder.sharePercentage)}
 											/>
+
 											<Detail
 												label="Shares held"
 												value={
@@ -232,6 +269,7 @@ export default function TraceGraph({
 														: holder.shareAmount.toLocaleString()
 												}
 											/>
+
 											<Detail
 												label="Share value"
 												value={
@@ -240,16 +278,19 @@ export default function TraceGraph({
 														: "IDR " + holder.shareValue.toLocaleString()
 												}
 											/>
+
 											<Detail
 												label="Category"
 												value={buildShareholderSubLabel(holder)}
 											/>
 										</dl>
+
 										<p className="mt-4 border-t border-[var(--color-border)] pt-4 text-xs text-[var(--color-muted)]">
 											Reported by Sectors
 											<br />
 											Ownership date unavailable
 										</p>
+
 										{!isNonTraceableShareholder(holder.name) ? (
 											<button
 												onClick={() => startTrace(holder.name)}
@@ -263,6 +304,7 @@ export default function TraceGraph({
 												shareholder and cannot be traced.
 											</p>
 										)}
+
 										{holder.symbol && (
 											<Link
 												className="mt-4 inline-block underline"
