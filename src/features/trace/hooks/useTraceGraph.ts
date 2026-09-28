@@ -1,6 +1,7 @@
 /** @format */
 
 import { useEffect, useMemo, useState } from "react";
+
 import type { ReactFlowInstance } from "reactflow";
 
 import type { EntityNode } from "../../../interfaces/trace";
@@ -26,6 +27,7 @@ export function useTraceGraph(
 			),
 		[ticker, company, ownership],
 	);
+	console.log("🚀 ~ useTraceGraph ~ graphData:", graphData);
 
 	useEffect(() => {
 		let active = true;

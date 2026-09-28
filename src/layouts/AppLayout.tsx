@@ -52,33 +52,31 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 				{children}
 			</main>
 
-			{showNav && (
-				<footer className="border-t border-[var(--color-border)] bg-[var(--color-primary)]">
-					<div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
-						<div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
-							{/* Brand */}
-							<BrandLogo variant="white" className="h-12" />
+			<footer className="border-t border-[var(--color-border)] bg-[var(--color-primary)]">
+				<div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
+					<div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
+						{/* Brand */}
+						<BrandLogo variant="white" className="h-12" />
 
-							{/* Description */}
-							<div className="max-w-md text-left sm:text-right">
-								<p className="text-xs leading-relaxed text-[var(--color-surface)]">
-									Explore ownership relationships and company structures for
-									Indonesian listed companies.
-								</p>
-							</div>
-						</div>
-
-						<div className="my-6 border-t border-[var(--color-border)]" />
-
-						{/* Bottom row */}
-						<div className="flex flex-col gap-2 text-xs text-[var(--color-surface)] sm:flex-row sm:items-center sm:justify-between">
-							<span>Data as reported by Sectors.</span>
-
-							<span>© {new Date().getFullYear()} TracePoint</span>
+						{/* Description */}
+						<div className="max-w-md text-left sm:text-right">
+							<p className="text-xs leading-relaxed text-[var(--color-surface)]">
+								Explore ownership relationships and company structures for
+								Indonesian listed companies.
+							</p>
 						</div>
 					</div>
-				</footer>
-			)}
+
+					<div className="my-6 border-t border-[var(--color-border)]" />
+
+					{/* Bottom row */}
+					<div className="flex flex-col gap-2 text-xs text-[var(--color-surface)] sm:flex-row sm:items-center sm:justify-between">
+						<span>Data as reported by Sectors.</span>
+
+						<span>© {new Date().getFullYear()} TracePoint</span>
+					</div>
+				</div>
+			</footer>
 		</div>
 	);
 }
