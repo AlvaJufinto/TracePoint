@@ -17,7 +17,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 		<div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-primary)] font-sans">
 			{showNav && (
 				<header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-white/90 shadow-sm backdrop-blur-xl">
-					<div className="mx-auto flex max-w-[1400px] items-center justify-between px-4 py-3 sm:px-6">
+					<div className="mx-auto flex max-w-[1400px] items-center justify-between py-3 px-4 lg:px-20">
 						<Link
 							to="/"
 							aria-label="TracePoint home"
@@ -45,15 +45,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 			</a>
 			<main
 				id="main-content"
-				className={`mx-auto max-w-[1400px] px-4 pb-12 sm:px-6 ${
-					isLanding ? "pt-12" : "pt-8"
+				className={`mx-auto  ${
+					isLanding ? "" : "max-w-7xl px-4 pb-12 sm:px-6 pt-8"
 				}`}
 			>
 				{children}
 			</main>
 
 			<footer className="border-t border-[var(--color-border)] bg-[var(--color-primary)]">
-				<div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
+				<div className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 pt-8">
 					<div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
 						{/* Brand */}
 						<BrandLogo variant="white" className="h-12" />

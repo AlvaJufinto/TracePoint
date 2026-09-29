@@ -102,10 +102,8 @@ export default function Home() {
 							return (
 								<div
 									key={feature.title}
-									className={`relative px-0 py-10 sm:px-7 sm:py-12 ${
-										index > 0
-											? "border-t border-[var(--color-border)] sm:border-l sm:border-t-0"
-											: ""
+									className={`relative border border-[var(--color-border)] px-0 py-10 sm:px-7 sm:py-12 ${
+										index > 0 ? "border-t-0 sm:border-l-0 sm:border-t" : ""
 									}`}
 								>
 									<div className="absolute right-0 top-0 h-3 w-3 bg-[var(--color-accent)]" />
@@ -133,13 +131,10 @@ export default function Home() {
 					</div>
 				</div>
 			</section>
+
 			<OwnershipGraph />
 			<section>
-				<div
-					className="mx-Ownership graph
-
- max-w-7xl px-6 py-14 sm:px-10 sm:py-20 lg:px-12"
-				>
+				<div className="mx-auto graph max-w-7xl py-14 px-4 sm:py-20 ">
 					<div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
 						<div>
 							<p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--color-accent)]">
@@ -195,7 +190,7 @@ export default function Home() {
 			</section>
 
 			<section className="bg-[#f7f7f7]">
-				<div className="mx-auto max-w-7xl px-6 py-10 sm:px-10 lg:px-12">
+				<div className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 pt-8">
 					<div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
 						<div>
 							<p className="text-sm font-bold">

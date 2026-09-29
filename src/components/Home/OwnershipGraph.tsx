@@ -8,7 +8,9 @@ import ReactFlow, {
 	Background,
 	BackgroundVariant,
 	type Edge,
+	getNodesBounds,
 	MarkerType,
+	type ReactFlowInstance,
 } from "reactflow";
 
 import type { EntityNode, EntityNodeData } from "../../interfaces/trace";
@@ -280,6 +282,7 @@ function getShareholderCategory(id: string) {
 	const percentage = getShareholderPercentage(id);
 
 	if (percentage >= 0.5) return "major";
+
 	if (id === "sh-Public" || id === "sh-Treasury%20Stock") {
 		return "aggregate";
 	}
@@ -351,29 +354,30 @@ function buildNodes(): EntityNode[] {
 		data: buildEntityData(company),
 	};
 
-	const shareholderNodes: EntityNode[] = shareholders.map((node, index) => {
-		const positions = [
-			{ x: 480, y: -10 },
-			{ x: 145, y: 215 },
-			{ x: 825, y: 215 },
-			{ x: 220, y: -20 },
-			{ x: 760, y: -20 },
-			{ x: 15, y: 115 },
-			{ x: 970, y: 115 },
-			{ x: 35, y: 405 },
-			{ x: 950, y: 405 },
-			{ x: 480, y: 410 },
-			{ x: 230, y: 500 },
-			{ x: 750, y: 500 },
-		];
+	const shareholderPositions = [
+		{ x: 480, y: -10 },
+		{ x: 145, y: 215 },
+		{ x: 825, y: 215 },
+		{ x: 220, y: -20 },
+		{ x: 760, y: -20 },
+		{ x: 15, y: 115 },
+		{ x: 970, y: 115 },
+		{ x: 35, y: 405 },
+		{ x: 950, y: 405 },
+		{ x: 480, y: 410 },
+		{ x: 230, y: 500 },
+		{ x: 750, y: 500 },
+	];
 
-		return {
-			id: node.id,
-			type: "customEntity",
-			position: positions[index] ?? { x: 480, y: 235 },
-			data: buildEntityData(node),
-		};
-	});
+	const shareholderNodes: EntityNode[] = shareholders.map((node, index) => ({
+		id: node.id,
+		type: "customEntity",
+		position: shareholderPositions[index] ?? {
+			x: 480,
+			y: 235,
+		},
+		data: buildEntityData(node),
+	}));
 
 	const metadataNodes: EntityNode[] = metadata.map((node, index) => ({
 		id: node.id,
@@ -401,9 +405,7 @@ function buildEdges(nodes: EntityNode[]): Edge[] {
 			const source = getPosition(edge.sourceId);
 			const target = getPosition(edge.targetId);
 
-			if (!source || !target) {
-				return null;
-			}
+			if (!source || !target) return null;
 
 			const sourceIsAbove = source.y < companyPosition.y;
 			const sourceIsLeft = source.x < companyPosition.x;
@@ -425,6 +427,10 @@ function buildEdges(nodes: EntityNode[]): Edge[] {
 						? "right"
 						: "bottom";
 
+			const percentage = edge.percentage ?? 0;
+
+			const markerSize = percentage >= 0.5 ? 14 : percentage >= 0.003 ? 12 : 10;
+
 			return {
 				id: edge.id,
 				source: edge.sourceId,
@@ -434,13 +440,11 @@ function buildEdges(nodes: EntityNode[]): Edge[] {
 				type: "ownership",
 				markerEnd: {
 					type: MarkerType.ArrowClosed,
-					width:
-						(edge.percentage ?? 0) >= 0.5 ? 14 : (edge.percentage ?? 0) >= 0.003 ? 12 : 10,
-					height:
-						(edge.percentage ?? 0) >= 0.5 ? 14 : (edge.percentage ?? 0) >= 0.003 ? 12 : 10,
+					width: markerSize,
+					height: markerSize,
 					color: "#A1A1AA",
 				},
-				label: `${((edge.percentage ?? 0) * 100).toFixed(3)}%`,
+				label: `${(percentage * 100).toFixed(3)}%`,
 				data: {
 					curve: 78,
 				},
@@ -464,23 +468,49 @@ function buildEdges(nodes: EntityNode[]): Edge[] {
 	return [...ownershipEdges, ...metadataEdges];
 }
 
+function centerGraph(instance: ReactFlowInstance, nodes: EntityNode[]) {
+	if (!nodes.length) return;
+
+	const bounds = getNodesBounds(nodes);
+
+	instance.setCenter(
+		bounds.x + bounds.width / 2,
+		bounds.y + bounds.height / 2,
+		{
+			zoom: 0.65,
+			duration: 0,
+		},
+	);
+}
+
 export default function OwnershipSlicing() {
 	const nodes = useMemo(() => buildNodes(), []);
 
 	const edges = useMemo(() => buildEdges(nodes), [nodes]);
 
+	const reactFlowNodes = useMemo(
+		() =>
+			nodes.map((node) => ({
+				...node,
+				draggable: false,
+				selectable: false,
+				connectable: false,
+			})),
+		[nodes],
+	);
+
+	const handleInit = (instance: ReactFlowInstance) => {
+		centerGraph(instance, nodes);
+	};
+
 	return (
 		<div className="relative h-[520px] w-full overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)]">
 			<ReactFlow
-				nodes={nodes.map((node) => ({
-					...node,
-					draggable: false,
-					selectable: false,
-					connectable: false,
-				}))}
+				nodes={reactFlowNodes}
 				edges={edges}
 				nodeTypes={nodeTypes}
 				edgeTypes={edgeTypes}
+				onInit={handleInit}
 				nodesDraggable={false}
 				nodesConnectable={false}
 				nodesFocusable={false}
@@ -493,11 +523,6 @@ export default function OwnershipSlicing() {
 				zoomOnDoubleClick={false}
 				minZoom={0.65}
 				maxZoom={0.65}
-				defaultViewport={{
-					x: -95,
-					y: -40,
-					zoom: 0.65,
-				}}
 			>
 				<Background
 					variant={BackgroundVariant.Lines}
