@@ -102,7 +102,7 @@ export default function Home() {
 							return (
 								<div
 									key={feature.title}
-									className={`relative border border-[var(--color-border)] px-0 py-10 sm:px-7 sm:py-12 ${
+									className={`relative border border-[var(--color-border)] border-b-0 px-0 py-10 sm:px-7 sm:py-12 ${
 										index > 0 ? "border-t-0 sm:border-l-0 sm:border-t" : ""
 									}`}
 								>
