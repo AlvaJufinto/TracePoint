@@ -19,6 +19,11 @@ interface FixtureCompany {
   corporateActions: TracePointCorporateActions;
 }
 
+interface FixtureShareholderTrace {
+  search: TracePointScreenerResponse;
+  verification: TraceVerifyResponse;
+}
+
 export interface TraceVerifyRequest {
   candidates: TraceCandidate[];
   maxBatch?: number;
@@ -32,6 +37,7 @@ export interface TraceVerifyResponse {
 }
 
 const fixtureRequests = new Map<string, Promise<FixtureCompany>>();
+const traceFixtureRequests = new Map<string, Promise<FixtureShareholderTrace | null>>();
 
 function normalizeTicker(ticker: string): string {
   const normalized = ticker.trim().toUpperCase();
@@ -56,6 +62,30 @@ function companyFor(ticker: string): Promise<FixtureCompany> {
     });
 
   fixtureRequests.set(normalized, request);
+  return request;
+}
+
+function traceFor(shareholderName: string): Promise<FixtureShareholderTrace | null> {
+  const normalized = shareholderName.trim().toLowerCase();
+  const cached = traceFixtureRequests.get(normalized);
+  if (cached) return cached;
+
+  const request = fetch(
+    `/api/fixture-data?shareholder=${encodeURIComponent(shareholderName.trim())}`,
+  )
+    .then(async (response) => {
+      if (response.status === 404) return null;
+      if (!response.ok) {
+        throw new Error(`Unable to load trace fixture for ${shareholderName.trim()}`);
+      }
+      return response.json() as Promise<FixtureShareholderTrace>;
+    })
+    .catch((error) => {
+      traceFixtureRequests.delete(normalized);
+      throw error;
+    });
+
+  traceFixtureRequests.set(normalized, request);
   return request;
 }
 
@@ -85,25 +115,24 @@ export async function getCorporateActions(ticker: string): Promise<TracePointCor
 
 export async function searchByShareholderName(
   shareholderName: string,
-  _limit = 50,
+  limit = 50,
   _signal?: AbortSignal,
 ): Promise<TracePointScreenerResponse> {
-  void _limit;
   void _signal;
-  const company = await companyFor('BBCA.JK');
-  const normalizedName = shareholderName.trim().toLowerCase();
-  const hasMatch = company.ownership.holders.some((holder) =>
-    holder.name.toLowerCase().includes(normalizedName),
-  );
-  const results = hasMatch
-    ? [{ ticker: company.overview.ticker, companyName: company.overview.name }]
-    : [];
+  const trace = await traceFor(shareholderName);
+  if (!trace) {
+    return { results: [], totalCount: 0, hasMore: false, nextOffset: null };
+  }
 
+  const results = trace.search.results.slice(0, limit);
   return {
     results,
-    totalCount: results.length,
-    hasMore: false,
-    nextOffset: null,
+    totalCount: trace.search.totalCount,
+    hasMore: trace.search.totalCount > results.length,
+    nextOffset:
+      trace.search.totalCount > results.length
+        ? results.length
+        : trace.search.nextOffset,
   };
 }
 
@@ -114,39 +143,18 @@ export async function verifyTraceCandidates(
   void _signal;
   const maxBatch = request.maxBatch ?? 5;
   const batch = request.candidates.slice(0, maxBatch);
-  const results = await Promise.all(batch.map(async (candidate): Promise<TraceVerification> => {
-    let company: FixtureCompany;
-    try {
-      company = await companyFor(candidate.ticker);
-    } catch {
-      return {
-        status: 'not_found',
-        ticker: candidate.ticker,
-        screenerName: candidate.screenerName,
-      };
-    }
-
-    const expectedName = candidate.screenerName.trim().toLowerCase();
-    const holder = company.ownership.holders.find(
-      (item) => item.name.trim().toLowerCase() === expectedName,
+  const shareholderName = batch[0]?.screenerName ?? '';
+  const trace = shareholderName ? await traceFor(shareholderName) : null;
+  const results = batch.map((candidate): TraceVerification => {
+    const captured = trace?.verification.results.find(
+      (item) => item.ticker === normalizeTicker(candidate.ticker),
     );
-    if (!holder) {
-      return {
-        status: 'not_found',
-        ticker: candidate.ticker,
-        screenerName: candidate.screenerName,
-      };
-    }
-
-    return {
-      status: 'confirmed',
+    return captured ?? {
+      status: 'not_found',
       ticker: candidate.ticker,
       screenerName: candidate.screenerName,
-      ownershipName: holder.name,
-      sharePercentage: holder.sharePercentage,
-      shareAmount: holder.shareAmount,
     };
-  }));
+  });
 
   return {
     results,

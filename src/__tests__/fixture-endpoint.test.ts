@@ -35,4 +35,24 @@ const body = payload as {
 assert.equal(body.overview.ticker, 'BBCA.JK');
 assert.equal(body.ownership.ticker, 'BBCA.JK');
 
-console.log('✓ development fixture endpoint returns BBCA JSON data');
+statusCode = 200;
+payload = undefined;
+await handler({
+  method: 'GET',
+  headers: { host: 'localhost:3000' },
+  query: { shareholder: 'PT Dwimuria Investama Andalan' },
+} as never, response as never);
+
+assert.equal(statusCode, 200);
+const traceBody = payload as {
+  search: { results: Array<{ ticker: string }> };
+  verification: { results: Array<{ ticker: string; status: string }> };
+};
+assert.deepEqual(traceBody.search.results.map((item) => item.ticker), [
+  'BBCA.JK',
+  'SSIA.JK',
+  'TOWR.JK',
+]);
+assert.ok(traceBody.verification.results.every((item) => item.status === 'confirmed'));
+
+console.log('✓ development fixture endpoint returns company and shareholder trace data');

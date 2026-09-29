@@ -16,6 +16,48 @@ export function CustomEntityNode({
 }) {
 	const isCompany = data.nodeType === "company";
 	const isShareholder = data.nodeType === "shareholder";
+	const isConnectedCompany = isCompany && data.companyRole === "connected";
+
+	if (isConnectedCompany) {
+		return (
+			<div
+				className={`relative flex h-[132px] w-[132px] flex-col items-center justify-center rounded-full border-2 px-4 text-center shadow-sm transition-all duration-200 select-none ${selected ? "border-[var(--color-primary)] bg-[var(--color-accent)]/25" : "border-[var(--color-primary)] bg-white hover:bg-[var(--color-accent)]/10"}`}
+			>
+				{["top", "right", "bottom", "left"].map((id) => (
+					<Handle
+						key={id}
+						id={id}
+						type="target"
+						position={
+							id === "top"
+								? Position.Top
+								: id === "right"
+									? Position.Right
+									: id === "bottom"
+										? Position.Bottom
+										: Position.Left
+						}
+						className="!h-2.5 !w-2.5 !border-2 !border-white !bg-[var(--color-primary)]"
+					/>
+				))}
+				<div className="flex items-center gap-1 text-[8px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
+					<Building2 size={11} aria-hidden="true" />
+					Connected company
+				</div>
+				<div className="mt-1 text-sm font-bold text-[var(--color-primary)]">
+					{data.label.replace(/\.JK$/, "")}
+				</div>
+				<div className="mt-1 line-clamp-2 text-[9px] leading-tight text-[var(--color-muted)]" title={data.subLabel}>
+					{data.subLabel}
+				</div>
+				<div className="mt-1 text-xs font-bold tabular-nums text-[var(--color-primary)]">
+					{data.sharePercentage == null
+						? "N/A"
+						: `${(data.sharePercentage * 100).toFixed(3)}%`}
+				</div>
+			</div>
+		);
+	}
 
 	if (isShareholder) {
 		const size = data.bubbleSize ?? MIN_BUBBLE_SIZE;

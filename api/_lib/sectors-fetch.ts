@@ -37,6 +37,12 @@ function errorCode(error: unknown): string {
 	return "UPSTREAM_CONNECTION_ERROR";
 }
 
+export function serializeSectorsUrl(url: URL): string {
+	// Sectors' structured-query parser treats `+` literally instead of as a
+	// space, so URLSearchParams' default form encoding breaks WHERE clauses.
+	return url.toString().replaceAll("+", "%20");
+}
+
 /** Normalize a ticker symbol to include .JK suffix if missing. */
 export function normalizeTicker(raw: string): string {
 	const cleaned = raw.trim().toUpperCase();
@@ -73,7 +79,7 @@ export async function sectorsFetch<T>(
 
 			for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
 				try {
-					const response = await fetch(url, {
+					const response = await fetch(serializeSectorsUrl(url), {
 						method: "GET",
 						// Surface redirects instead of silently following a different auth target.
 						redirect: "manual",

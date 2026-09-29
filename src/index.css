@@ -148,6 +148,32 @@ aside[role="dialog"] {
 	animation: slideIn 0.2s ease-out;
 }
 
+@keyframes traceNodeReveal {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes traceBubbleReveal {
+	from {
+		transform: scale(0.72);
+	}
+	to {
+		transform: scale(1);
+	}
+}
+
+.react-flow__node.trace-company-node {
+	animation: traceNodeReveal 0.28s ease-out both;
+}
+
+.react-flow__node.trace-company-node > div {
+	animation: traceBubbleReveal 0.28s ease-out both;
+}
+
 button:disabled {
 	cursor: not-allowed;
 	opacity: 0.55;

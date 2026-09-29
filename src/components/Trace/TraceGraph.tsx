@@ -1,6 +1,8 @@
 /** @format */
 
-import { X } from "lucide-react";
+import { useMemo } from "react";
+
+import { Loader2, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import ReactFlow, {
 	Background,
@@ -23,8 +25,14 @@ import {
 	isNonTraceableShareholder,
 	toReactFlowEdges,
 } from "../../utils/trace/graph";
+import {
+	buildShareholderTraceGraph,
+	shouldShowTraceShareholderAction,
+	type ShareholderConnection,
+} from "../../utils/trace/shareholder-network";
 import Skeleton from "../Skeleton";
 import Detail from "./Detail";
+import FitWhenReady from "./FitWhenReady";
 import PanelFeedback from "./PanelFeedback";
 import { CustomEntityNode, OwnershipLine } from "./TraceGraphPrimitives";
 
@@ -48,6 +56,14 @@ type Props = {
 	clearSelection: () => void;
 	startTrace: (name: string) => void;
 	closeInspector: () => void;
+	tracedShareholder: string | null;
+	traceConnections: ShareholderConnection[];
+	traceLoading: boolean;
+	traceError: boolean;
+	onRetryTrace: () => void;
+	onVerifyNext?: () => void;
+	onClearTrace: () => void;
+	onOpenConnectedCompany: (ticker: string) => void;
 };
 
 export default function TraceGraph({
@@ -67,7 +83,61 @@ export default function TraceGraph({
 	clearSelection,
 	startTrace,
 	closeInspector,
+	tracedShareholder,
+	traceConnections,
+	traceLoading,
+	traceError,
+	onRetryTrace,
+	onVerifyNext,
+	onClearTrace,
+	onOpenConnectedCompany,
 }: Props) {
+	const tracedShareholderId = tracedShareholder
+		? `sh-${encodeURIComponent(tracedShareholder)}`
+		: null;
+	const expansion = useMemo(() => {
+		if (!tracedShareholder || !tracedShareholderId) {
+			return { nodes: [], edges: [] };
+		}
+		const shareholderNode = reactFlowNodes.find(
+			(node) => node.id === tracedShareholderId,
+		);
+		const companyNode = reactFlowNodes.find((node) => node.id === ticker);
+		if (!shareholderNode || !companyNode) return { nodes: [], edges: [] };
+
+		return buildShareholderTraceGraph({
+			shareholderId: tracedShareholderId,
+			shareholderName: tracedShareholder,
+			currentTicker: ticker,
+			shareholderNode,
+			companyNode,
+			connections: traceConnections,
+		});
+	}, [
+		tracedShareholder,
+		tracedShareholderId,
+		ticker,
+		reactFlowNodes,
+		traceConnections,
+	]);
+	const visibleNodes = [...reactFlowNodes, ...expansion.nodes];
+	const visibleEdges = [
+		...toReactFlowEdges(
+			graphData.ownershipEdges,
+			graphData.metadataEdges,
+			selectedNode,
+			reactFlowNodes,
+		),
+		...expansion.edges,
+	];
+	const shareholderCategories = new Set(
+		reactFlowNodes
+			.filter((node) => node.data.nodeType === "shareholder")
+			.map((node) => node.data.shareCategory)
+			.filter(Boolean),
+	);
+	const traceCount = expansion.nodes.length;
+
 	return (
 		<section
 			aria-label="Ownership relationships"
@@ -149,20 +219,21 @@ export default function TraceGraph({
 						</div>
 					) : (
 						<ReactFlow
-							nodes={reactFlowNodes.map((node) => ({
+							nodes={visibleNodes.map((node) => ({
 								...node,
 								selected: node.id === selectedNode,
 								ariaLabel: node.data.label + ", " + node.data.subLabel,
 							}))}
-							edges={toReactFlowEdges(
-								graphData.ownershipEdges,
-								graphData.metadataEdges,
-								selectedNode,
-								reactFlowNodes,
-							)}
+							edges={visibleEdges}
 							edgeTypes={edgeTypes}
 							onInit={setFlow}
-							onNodeClick={(_, node) => inspect(node.id)}
+							onNodeClick={(_, node) => {
+								if (node.data.companyRole === "connected" && node.data.ticker) {
+									onOpenConnectedCompany(node.data.ticker);
+									return;
+								}
+								inspect(node.id);
+							}}
 							onEdgeClick={(_, edge) =>
 								inspect(edge.id.startsWith("me-") ? edge.target : edge.source)
 							}
@@ -189,35 +260,76 @@ export default function TraceGraph({
 								size={2}
 								color="#9C9C9C17"
 							/>
+							<FitWhenReady
+								changeKey={`${tracedShareholder || "base"}-${traceCount}`}
+							/>
 
-							<div className="absolute bottom-4 left-4 z-10 flex flex-col gap-2 border border-[var(--color-border)] bg-white/95 px-3 py-2 shadow-sm sm:flex-row sm:items-center sm:gap-4">
-								<span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
-									Legend
-								</span>
-
-								<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-primary)]">
-									<span className="h-2.5 w-2.5 rounded-full border border-[var(--color-primary)] bg-[var(--color-accent)]" />
-									Major
+							{tracedShareholder && (
+								<div className="absolute left-4 top-4 z-10 w-[min(340px,calc(100%-2rem))] border border-[var(--color-border)] bg-white/95 p-3 shadow-sm backdrop-blur-sm">
+									<div className="flex items-start justify-between gap-3">
+										<div className="min-w-0">
+											<p className="text-[9px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
+												Shareholder trace
+											</p>
+											<p className="mt-1 truncate text-xs font-bold" title={tracedShareholder}>
+												{tracedShareholder}
+											</p>
+										</div>
+										<button
+											onClick={onClearTrace}
+											aria-label="Clear shareholder trace"
+											className="flex h-8 w-8 shrink-0 items-center justify-center hover:bg-[var(--color-surface)]"
+										>
+											<X size={15} />
+										</button>
+									</div>
+									{traceLoading ? (
+										<p role="status" className="mt-2 flex items-center gap-2 text-xs text-[var(--color-muted)]">
+											<Loader2 size={14} className="animate-spin" />
+											Finding and confirming connected companies…
+										</p>
+									) : traceError ? (
+										<div className="mt-2 flex items-center justify-between gap-3 text-xs">
+											<span>Trace could not be completed.</span>
+											<button onClick={onRetryTrace} className="font-bold underline">
+												Retry
+											</button>
+										</div>
+									) : (
+										<div className="mt-2 flex items-center justify-between gap-3 text-xs text-[var(--color-muted)]">
+											<span>
+												{traceCount > 0
+													? `${traceCount} other confirmed ${traceCount === 1 ? "company" : "companies"} added`
+													: "No other confirmed companies found"}
+											</span>
+											{onVerifyNext && (
+												<button onClick={onVerifyNext} className="shrink-0 font-bold text-[var(--color-primary)] underline">
+													Check more
+												</button>
+											)}
+										</div>
+									)}
 								</div>
+							)}
 
-								<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)]">
-									<span className="h-2.5 w-2.5 rounded-full border border-[var(--color-border-strong)] bg-[var(--color-surface)]" />
-									Corporate
+							<div className="pointer-events-none absolute bottom-4 left-4 z-10 hidden max-w-[calc(100%-2rem)] flex-col items-start gap-2.5 border border-[var(--color-border)] bg-white/95 px-3 py-2.5 shadow-sm sm:flex">
+								<span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">Legend</span>
+								<div>
+									<p className="mb-1.5 text-[9px] font-bold uppercase tracking-wider text-[var(--color-muted)]">Shareholder classification</p>
+									<div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+										{shareholderCategories.has("major") && <div className="flex items-center gap-1.5 text-xs font-semibold"><span className="h-2.5 w-2.5 rounded-full border border-[var(--color-primary)] bg-[var(--color-accent)]" />Major shareholder</div>}
+										{shareholderCategories.has("corporate") && <div className="flex items-center gap-1.5 text-xs font-semibold"><span className="h-2.5 w-2.5 rounded-full border-2 border-[var(--color-border-strong)] bg-[var(--color-surface)]" />Corporate shareholder</div>}
+										{shareholderCategories.has("minority") && <div className="flex items-center gap-1.5 text-xs font-semibold"><span className="h-2.5 w-2.5 rounded-full border border-[var(--color-border)] bg-white" />Minority shareholder</div>}
+										{shareholderCategories.has("aggregate") && <div className="flex items-center gap-1.5 text-xs font-semibold"><span className="h-2.5 w-2.5 rounded-full border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface)]" />Aggregate holding</div>}
+									</div>
 								</div>
-
-								<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)]">
-									<span className="h-2.5 w-2.5 rounded-full border border-[var(--color-border)] bg-white" />
-									Minority
-								</div>
-
-								<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)]">
-									<span className="h-2.5 w-2.5 rounded-full border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface)]" />
-									Aggregate
-								</div>
-
-								<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)]">
-									<span className="w-5 border-t border-dashed border-[var(--color-border-strong)]" />
-									Context
+								<div className="border-t border-[var(--color-border)] pt-2">
+									<p className="mb-1.5 text-[9px] font-bold uppercase tracking-wider text-[var(--color-muted)]">Connection type</p>
+									<div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+										<div className="flex items-center gap-1.5 text-xs font-semibold"><span className="w-5 border-t border-[var(--color-border-strong)]" />Direct ownership</div>
+										{traceCount > 0 && <div className="flex items-center gap-1.5 text-xs font-semibold"><span className="w-5 border-t-2 border-[var(--color-primary)]" />Traced ownership</div>}
+										{graphData.metadataEdges.length > 0 && <div className="flex items-center gap-1.5 text-xs font-semibold"><span className="w-5 border-t border-dashed border-[var(--color-border-strong)]" />Context / affiliation</div>}
+									</div>
 								</div>
 							</div>
 						</ReactFlow>
@@ -291,19 +403,26 @@ export default function TraceGraph({
 											Ownership date unavailable
 										</p>
 
-										{!isNonTraceableShareholder(holder.name) ? (
+										{!isNonTraceableShareholder(holder.name) &&
+										shouldShowTraceShareholderAction({
+											holderName: holder.name,
+											tracedShareholder,
+											traceLoading,
+											traceError,
+											connectedCompanyCount: traceCount,
+										}) ? (
 											<button
 												onClick={() => startTrace(holder.name)}
 												className="mt-4 min-h-11 w-full bg-[var(--color-accent)] px-4 font-bold hover:brightness-95"
 											>
 												Trace shareholder
 											</button>
-										) : (
+										) : isNonTraceableShareholder(holder.name) ? (
 											<p className="mt-4 text-sm">
 												This aggregate entry does not identify a single
 												shareholder and cannot be traced.
 											</p>
-										)}
+										) : null}
 
 										{holder.symbol && (
 											<Link

@@ -15,6 +15,23 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const shareholder = String(req.query.shareholder ?? '').trim();
+  if (shareholder) {
+    const key = `shareholder-${shareholder
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')}`;
+    const searches = fixtureData.searches as Record<string, unknown>;
+    const verifications = fixtureData.traceVerifications as Record<string, unknown>;
+    const search = searches[key];
+    const verification = verifications[key];
+    if (!search || !verification) {
+      return res.status(404).json({ error: `No trace fixture available for ${shareholder}` });
+    }
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(200).json({ search, verification });
+  }
+
   const ticker = String(req.query.ticker ?? 'BBCA.JK').trim().toUpperCase();
   const normalized = ticker.endsWith('.JK') ? ticker : `${ticker}.JK`;
   const company = fixtureData.companies[

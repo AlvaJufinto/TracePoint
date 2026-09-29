@@ -2,16 +2,17 @@
   "meta": {
     "schemaVersion": 1,
     "source": "live-sectors-api",
-    "capturedAt": "2026-09-24",
-    "liveApiCallsUsed": 6,
-    "estimatedCreditsUsed": 8,
+    "capturedAt": "2026-09-29",
+    "liveApiCallsUsed": 9,
+    "estimatedCreditsUsed": 11,
     "dataShape": "TracePoint internal normalized contracts",
-    "completeness": "BBCA-only detail fixture",
+    "completeness": "BBCA detail fixture with verified Dwimuria cross-company trace",
     "notes": [
       "Fixture scope is BBCA.JK only.",
       "Raw BBCA responses are stored in api/fixtures/raw.",
       "Free float was not refreshed because that endpoint costs 10 credits; the value is from the documented 2026-09-22 capture.",
-      "Ownership asOf remains null because Sectors does not expose that date."
+      "Ownership asOf remains null because Sectors does not expose that date.",
+      "Dwimuria trace candidates and SSIA/TOWR ownership sections were captured with three bounded live requests on 2026-09-29."
     ]
   },
   "companies": {
@@ -816,6 +817,25 @@
       "hasMore": false,
       "nextOffset": null
     },
+    "shareholder-pt-dwimuria-investama-andalan": {
+      "results": [
+        {
+          "ticker": "BBCA.JK",
+          "companyName": "PT Bank Central Asia Tbk."
+        },
+        {
+          "ticker": "SSIA.JK",
+          "companyName": "PT Surya Semesta Internusa Tbk"
+        },
+        {
+          "ticker": "TOWR.JK",
+          "companyName": "Sarana Menara Nusantara Tbk"
+        }
+      ],
+      "totalCount": 3,
+      "hasMore": false,
+      "nextOffset": 3
+    },
     "no-results": {
       "results": [],
       "totalCount": 0,
@@ -824,6 +844,37 @@
     }
   },
   "traceVerifications": {
+    "shareholder-pt-dwimuria-investama-andalan": {
+      "results": [
+        {
+          "status": "confirmed",
+          "ticker": "BBCA.JK",
+          "screenerName": "PT Dwimuria Investama Andalan",
+          "ownershipName": "PT Dwimuria Investama Andalan",
+          "sharePercentage": 0.54942,
+          "shareAmount": 67729950000
+        },
+        {
+          "status": "confirmed",
+          "ticker": "SSIA.JK",
+          "screenerName": "PT Dwimuria Investama Andalan",
+          "ownershipName": "PT Dwimuria Investama Andalan",
+          "sharePercentage": 0.1024,
+          "shareAmount": 482000000
+        },
+        {
+          "status": "confirmed",
+          "ticker": "TOWR.JK",
+          "screenerName": "PT Dwimuria Investama Andalan",
+          "ownershipName": "PT Dwimuria Investama Andalan",
+          "sharePercentage": 0.19954,
+          "shareAmount": 11792689937
+        }
+      ],
+      "processed": 3,
+      "limited": false,
+      "maxBatch": 3
+    },
     "shareholder-Dwimuria-in-BBCA": {
       "results": [
         {

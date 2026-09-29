@@ -24,6 +24,7 @@ export type EntityNodeData = {
 	sharePercentage?: number | null;
 	holderCategory?: string;
 	shareCategory?: ShareholderCategory;
+	companyRole?: "target" | "connected";
 };
 
 export type EntityNode = Node<EntityNodeData>;

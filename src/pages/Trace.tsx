@@ -2,15 +2,15 @@
 
 import "reactflow/dist/style.css";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import TraceCompanyContext from "../components/Trace/TraceCompanyContext";
 import TraceGraph from "../components/Trace/TraceGraph";
 import TraceHeader from "../components/Trace/TraceHeader";
-import TraceResultsDrawer from "../components/TraceResultsDrawer";
 import { useTraceData } from "../features/trace/hooks/useTraceData";
 import { useTraceGraph } from "../features/trace/hooks/useTraceGraph";
+import { buildShareholderConnections } from "../utils/trace/shareholder-network";
 
 function normalizeTicker(value: string | null) {
 	return (value || "BBCA").trim().toUpperCase().replace(/\.JK$/, "") + ".JK";
@@ -35,7 +35,6 @@ function Investigation({ ticker }: { ticker: string }) {
 		traceCandidates,
 		traceLoading,
 		traceError,
-		traceMore,
 		refreshTrace,
 		verifyNext,
 		pendingCount,
@@ -50,6 +49,25 @@ function Investigation({ ticker }: { ticker: string }) {
 	const holder = ownership.data?.holders.find(
 		(item) => "sh-" + encodeURIComponent(item.name) === selectedNode,
 	);
+	const tracedHolder = ownership.data?.holders.find(
+		(item) => item.name === shareholder,
+	);
+	const traceConnections = useMemo(
+		() =>
+			buildShareholderConnections(
+				tracedHolder
+					? {
+							ticker,
+							companyName:
+								company.data?.name || ownership.data?.companyName || ticker,
+							sharePercentage: tracedHolder.sharePercentage,
+							shareAmount: tracedHolder.shareAmount,
+						}
+					: null,
+				traceCandidates,
+			),
+		[ticker, company.data, ownership.data, tracedHolder, traceCandidates],
+	);
 	const selected =
 		graphData.nodes.find((node) => node.id === selectedNode) ||
 		(holder
@@ -61,6 +79,16 @@ function Investigation({ ticker }: { ticker: string }) {
 		if (name) next.set("shareholder", name);
 		else next.delete("shareholder");
 		setParams(next, { replace: !name });
+	}
+
+	function openConnectedCompany(nextTicker: string) {
+		setParams(
+			new URLSearchParams({
+				ticker: nextTicker,
+				...(shareholder ? { via: shareholder, from: ticker } : {}),
+				returnTo: searchLink,
+			}),
+		);
 	}
 
 	return (
@@ -90,8 +118,19 @@ function Investigation({ ticker }: { ticker: string }) {
 				setFlow={setFlow}
 				inspect={setSelectedNode}
 				clearSelection={() => setSelectedNode(null)}
-				startTrace={updateTraceName}
+				startTrace={(name) => {
+					updateTraceName(name);
+					setSelectedNode(null);
+				}}
 				closeInspector={() => setSelectedNode(null)}
+				tracedShareholder={shareholder}
+				traceConnections={traceConnections}
+				traceLoading={traceLoading}
+				traceError={traceError}
+				onRetryTrace={refreshTrace}
+				onVerifyNext={pendingCount ? verifyNext : undefined}
+				onClearTrace={() => updateTraceName(null)}
+				onOpenConnectedCompany={openConnectedCompany}
 			/>
 
 			<TraceCompanyContext
@@ -102,21 +141,6 @@ function Investigation({ ticker }: { ticker: string }) {
 				retry={retryPanel}
 			/>
 
-			{shareholder && (
-				<TraceResultsDrawer
-					key={shareholder}
-					name={shareholder}
-					origin={ticker}
-					searchLink={searchLink}
-					candidates={traceCandidates}
-					isLoading={traceLoading}
-					error={traceError}
-					hasMore={traceMore}
-					onClose={() => updateTraceName(null)}
-					onRetry={refreshTrace}
-					onVerifyNext={pendingCount ? verifyNext : undefined}
-				/>
-			)}
 		</div>
 	);
 }

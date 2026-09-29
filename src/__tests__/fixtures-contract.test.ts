@@ -32,7 +32,7 @@ function assert(condition: boolean, message: string): asserts condition {
 }
 
 assert(fixture.meta.source === 'live-sectors-api', 'Fixture provenance must be explicit');
-assert(fixture.meta.liveApiCallsUsed === 6, 'Fixture capture request count changed unexpectedly');
+assert(fixture.meta.liveApiCallsUsed === 9, 'Fixture capture request count changed unexpectedly');
 assert(/^\d{4}-\d{2}-\d{2}$/.test(fixture.meta.capturedAt), 'capturedAt must be YYYY-MM-DD');
 
 for (const [ticker, company] of Object.entries(fixture.companies)) {

@@ -1,0 +1,477 @@
+{
+  "meta": {
+    "source": "live-sectors-api",
+    "capturedAt": "2026-09-29T15:52:06.607Z",
+    "shareholderName": "PT Dwimuria Investama Andalan",
+    "liveApiCallsUsed": 3,
+    "maxCandidates": 3,
+    "notes": [
+      "Existing company fixtures were reused without an upstream request.",
+      "Only ownership sections were requested for uncaptured candidates."
+    ]
+  },
+  "search": {
+    "results": [
+      {
+        "symbol": "BBCA.JK",
+        "company_name": "PT Bank Central Asia Tbk."
+      },
+      {
+        "symbol": "SSIA.JK",
+        "company_name": "PT Surya Semesta Internusa Tbk"
+      },
+      {
+        "symbol": "TOWR.JK",
+        "company_name": "Sarana Menara Nusantara Tbk"
+      }
+    ],
+    "pagination": {
+      "total_count": 3,
+      "showing": 3,
+      "limit": 3,
+      "offset": 0,
+      "has_next": false,
+      "has_previous": false,
+      "next_offset": null,
+      "previous_offset": null
+    }
+  },
+  "rawOwnership": {
+    "SSIA.JK": {
+      "symbol": "SSIA.JK",
+      "company_name": "PT Surya Semesta Internusa Tbk",
+      "ownership": {
+        "major_shareholders": [
+          {
+            "name": "Public",
+            "share_value": 3998932898400,
+            "share_amount": 2423595696,
+            "share_percentage": "0.5151"
+          },
+          {
+            "name": "PT Henan Putihrai Asset Management",
+            "share_value": 1021427715000,
+            "share_amount": 619047100,
+            "share_percentage": "0.1315"
+          },
+          {
+            "name": "PT Dwimuria Investama Andalan",
+            "share_value": 795300000000,
+            "share_amount": 482000000,
+            "share_percentage": "0.1024"
+          },
+          {
+            "name": "PT Arman Investments Utama",
+            "share_value": 661363137600,
+            "share_amount": 400826144,
+            "share_percentage": "0.0852"
+          },
+          {
+            "name": "Gsi S/A Intrepid Investments Limited",
+            "share_value": 636925740000,
+            "share_amount": 386015600,
+            "share_percentage": "0.082"
+          },
+          {
+            "name": "Ddbs Bank Ltd Sg S/A PT Persada Capital Investama",
+            "share_value": 609160200000,
+            "share_amount": 369188000,
+            "share_percentage": "0.0785"
+          },
+          {
+            "name": "Johannes Suriadjaja",
+            "share_value": 27591960000,
+            "share_amount": 16722400,
+            "share_percentage": "0.0036"
+          },
+          {
+            "name": "Sonny Satia Negara",
+            "share_value": 5434275000,
+            "share_amount": 3293500,
+            "share_percentage": "0.0007"
+          },
+          {
+            "name": "The Jok Tung",
+            "share_value": 3668115000,
+            "share_amount": 2223100,
+            "share_percentage": "0.0005"
+          },
+          {
+            "name": "Wilson Effendy",
+            "share_value": 3857535000,
+            "share_amount": 2337900,
+            "share_percentage": "0.0005"
+          }
+        ],
+        "top_transactions": {
+          "date": "2026-02-28",
+          "top_buyers": [
+            {
+              "name": "PT Eastspring Investment Indonesia",
+              "changeAmount": 1408700
+            },
+            {
+              "name": "Dimensional Fund Advisors Ltd",
+              "changeAmount": 564800
+            },
+            {
+              "name": "DFA Australia Limited",
+              "changeAmount": 3086
+            }
+          ],
+          "top_sellers": [
+            {
+              "name": "SEI Investments Management Corp",
+              "changeAmount": -1957200
+            },
+            {
+              "name": "Dimensional Fund Advisors LP",
+              "changeAmount": -1113741
+            },
+            {
+              "name": "Connor, Clark & Lunn Inv Mngt Ltd.,",
+              "changeAmount": -138600
+            }
+          ]
+        },
+        "institutional_transaction_flow": [
+          {
+            "date": "2026-02-28",
+            "net_transaction": -324969710
+          },
+          {
+            "date": "2026-01-31",
+            "net_transaction": -319460244
+          },
+          {
+            "date": "2025-12-31",
+            "net_transaction": -310251626
+          },
+          {
+            "date": "2025-11-30",
+            "net_transaction": -322521954
+          },
+          {
+            "date": "2025-10-31",
+            "net_transaction": -329912118
+          },
+          {
+            "date": "2025-09-30",
+            "net_transaction": -331764586
+          },
+          {
+            "date": "2025-08-31",
+            "net_transaction": -334912786
+          },
+          {
+            "date": "2025-07-31",
+            "net_transaction": -337225490
+          },
+          {
+            "date": "2025-06-30",
+            "net_transaction": 6283692
+          },
+          {
+            "date": "2025-05-31",
+            "net_transaction": 8346478
+          },
+          {
+            "date": "2025-04-30",
+            "net_transaction": -1492282
+          },
+          {
+            "date": "2025-03-31",
+            "net_transaction": -84400026
+          },
+          {
+            "date": "2025-02-28",
+            "net_transaction": -92407738
+          },
+          {
+            "date": "2025-01-31",
+            "net_transaction": -83071384
+          },
+          {
+            "date": "2024-12-31",
+            "net_transaction": 22702660
+          },
+          {
+            "date": "2024-11-30",
+            "net_transaction": 46262708
+          },
+          {
+            "date": "2024-09-30",
+            "net_transaction": -27894924
+          },
+          {
+            "date": "2024-06-30",
+            "net_transaction": -72806100
+          },
+          {
+            "date": "2024-01-31",
+            "net_transaction": -132186578
+          },
+          {
+            "date": "2023-12-31",
+            "net_transaction": -138450304
+          }
+        ],
+        "whale_investors": [
+          "Ferry Sudjono",
+          "Honky Harjo",
+          "Prajogo Pangestu",
+          "Ungkoro Darmosusilo"
+        ],
+        "conglomerates_group": [
+          "Djarum Group",
+          "Barito Group"
+        ]
+      }
+    },
+    "TOWR.JK": {
+      "symbol": "TOWR.JK",
+      "company_name": "Sarana Menara Nusantara Tbk",
+      "ownership": {
+        "major_shareholders": [
+          {
+            "name": "PT Sapta Adhikari Investama",
+            "share_value": 10223942035030,
+            "share_amount": 26764246165,
+            "share_percentage": "0.45288"
+          },
+          {
+            "name": "Public",
+            "share_value": 6196280452956,
+            "share_amount": 16220629458,
+            "share_percentage": "0.27447"
+          },
+          {
+            "name": "PT Dwimuria Investama Andalan",
+            "share_value": 4504807555934,
+            "share_amount": 11792689937,
+            "share_percentage": "0.19954"
+          },
+          {
+            "name": "PT Lingkarmulia Indah",
+            "share_value": 1203971344372,
+            "share_amount": 3151757446,
+            "share_percentage": "0.05333"
+          },
+          {
+            "name": "Treasury Stock",
+            "share_value": 261713759628,
+            "share_amount": 685114554,
+            "share_percentage": "0.01159"
+          },
+          {
+            "name": "Ario Wibisono",
+            "share_value": 95315417600,
+            "share_amount": 249516800,
+            "share_percentage": "0.00422"
+          },
+          {
+            "name": "Ferdinandus Aming Santoso",
+            "share_value": 41871509342,
+            "share_amount": 109611281,
+            "share_percentage": "0.00185"
+          },
+          {
+            "name": "Eko Santoso Hadiprodjo",
+            "share_value": 16681940000,
+            "share_amount": 43670000,
+            "share_percentage": "0.00074"
+          },
+          {
+            "name": "Indra Gunawan",
+            "share_value": 15601067180,
+            "share_amount": 40840490,
+            "share_percentage": "0.00069"
+          },
+          {
+            "name": "Anita Anwar",
+            "share_value": 12287641200,
+            "share_amount": 32166600,
+            "share_percentage": "0.00054"
+          },
+          {
+            "name": "Kenny Harjo",
+            "share_value": 3002902000,
+            "share_amount": 7861000,
+            "share_percentage": "0.00013"
+          }
+        ],
+        "top_transactions": {
+          "date": "2026-02-28",
+          "top_buyers": [
+            {
+              "name": "BlackRock Fund Advisors",
+              "changeAmount": 52480316
+            },
+            {
+              "name": "Virtus Investment Advisers, LLC",
+              "changeAmount": 22396000
+            },
+            {
+              "name": "Kayne Anderson Rudnick Investment Management LLC",
+              "changeAmount": 10797179
+            }
+          ],
+          "top_sellers": [
+            {
+              "name": "Harris Associates L.P.",
+              "changeAmount": -28766200
+            },
+            {
+              "name": "BlackRock Advisors (UK) Limited",
+              "changeAmount": -18634965
+            },
+            {
+              "name": "Dimensional Fund Advisors LP",
+              "changeAmount": -4827404
+            }
+          ]
+        },
+        "institutional_transaction_flow": [
+          {
+            "date": "2026-02-28",
+            "net_transaction": 379364728
+          },
+          {
+            "date": "2026-01-31",
+            "net_transaction": -339459894
+          },
+          {
+            "date": "2025-12-31",
+            "net_transaction": -183942800
+          },
+          {
+            "date": "2025-11-30",
+            "net_transaction": -2886758
+          },
+          {
+            "date": "2025-10-31",
+            "net_transaction": 980763374
+          },
+          {
+            "date": "2025-09-30",
+            "net_transaction": 301258400
+          },
+          {
+            "date": "2025-08-31",
+            "net_transaction": -283785606
+          },
+          {
+            "date": "2025-07-31",
+            "net_transaction": -998567676
+          },
+          {
+            "date": "2025-06-30",
+            "net_transaction": -1860030838
+          },
+          {
+            "date": "2025-05-31",
+            "net_transaction": -1855127960
+          },
+          {
+            "date": "2025-04-30",
+            "net_transaction": -955369554
+          },
+          {
+            "date": "2025-03-31",
+            "net_transaction": -1119109936
+          },
+          {
+            "date": "2025-02-28",
+            "net_transaction": -748160200
+          },
+          {
+            "date": "2025-01-31",
+            "net_transaction": -1742737964
+          },
+          {
+            "date": "2024-12-31",
+            "net_transaction": -1478630376
+          },
+          {
+            "date": "2024-11-30",
+            "net_transaction": -980443548
+          },
+          {
+            "date": "2024-09-30",
+            "net_transaction": -1121135560
+          },
+          {
+            "date": "2024-06-30",
+            "net_transaction": -1049470042
+          },
+          {
+            "date": "2024-01-31",
+            "net_transaction": -153265324
+          },
+          {
+            "date": "2023-12-31",
+            "net_transaction": 183809012
+          }
+        ],
+        "whale_investors": [
+          "Chandra Adisusanto"
+        ],
+        "conglomerates_group": [
+          "Djarum Group"
+        ]
+      }
+    }
+  },
+  "normalized": {
+    "search": {
+      "results": [
+        {
+          "ticker": "BBCA.JK",
+          "companyName": "PT Bank Central Asia Tbk."
+        },
+        {
+          "ticker": "SSIA.JK",
+          "companyName": "PT Surya Semesta Internusa Tbk"
+        },
+        {
+          "ticker": "TOWR.JK",
+          "companyName": "Sarana Menara Nusantara Tbk"
+        }
+      ],
+      "totalCount": 3,
+      "hasMore": false,
+      "nextOffset": 3
+    },
+    "verification": {
+      "results": [
+        {
+          "status": "confirmed",
+          "ticker": "BBCA.JK",
+          "screenerName": "PT Dwimuria Investama Andalan",
+          "ownershipName": "PT Dwimuria Investama Andalan",
+          "sharePercentage": 0.54942,
+          "shareAmount": 67729950000
+        },
+        {
+          "status": "confirmed",
+          "ticker": "SSIA.JK",
+          "screenerName": "PT Dwimuria Investama Andalan",
+          "ownershipName": "PT Dwimuria Investama Andalan",
+          "sharePercentage": 0.1024,
+          "shareAmount": 482000000
+        },
+        {
+          "status": "confirmed",
+          "ticker": "TOWR.JK",
+          "screenerName": "PT Dwimuria Investama Andalan",
+          "ownershipName": "PT Dwimuria Investama Andalan",
+          "sharePercentage": 0.19954,
+          "shareAmount": 11792689937
+        }
+      ],
+      "processed": 3,
+      "limited": false,
+      "maxBatch": 3
+    }
+  }
+}

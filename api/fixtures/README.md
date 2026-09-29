@@ -1,6 +1,6 @@
-# TracePoint BBCA fixtures
+# TracePoint fixtures
 
-Fixture data khusus `BBCA.JK` untuk local development dan UI testing tanpa request rutin ke Sectors API.
+Fixture data untuk local development dan UI testing tanpa request rutin ke Sectors API. Detail company workspace tetap berfokus pada `BBCA.JK`; trace shareholder Dwimuria mencakup relasi terverifikasi ke `SSIA.JK` dan `TOWR.JK`.
 
 ## Files
 
@@ -8,6 +8,7 @@ Fixture data khusus `BBCA.JK` untuk local development dan UI testing tanpa reque
 - `raw/company-report-BBCA.json` — raw overview, ownership, dan management.
 - `raw/shareholders-composition-BBCA.json` — raw komposisi pemegang saham.
 - `raw/corporate-actions-BBCA.json` — raw corporate actions.
+- `raw/shareholder-trace-pt-dwimuria-investama-andalan.json` — capture pencarian dan ownership-only verification untuk trace lintas perusahaan.
 
 ## Coverage
 
@@ -17,9 +18,11 @@ Fixture data khusus `BBCA.JK` untuk local development dan UI testing tanpa reque
 - Shareholder composition
 - Corporate actions
 - Pencarian ticker BBCA dan empty state
-- Verifikasi PT Dwimuria Investama Andalan di BBCA
+- Verifikasi PT Dwimuria Investama Andalan di BBCA, SSIA, dan TOWR
 
 Free float `0.45058` berasal dari capture terdokumentasi 2026-09-22. Endpoint tersebut tidak dipanggil ulang karena biayanya 10 kredit.
+
+Capture trace Dwimuria pada 2026-09-29 menggunakan tiga request live: satu structured screener query dan dua company-report ownership sections. BBCA menggunakan fixture yang sudah ada. Estimasi biaya tambahan: 3 kredit berdasarkan tarif Sectors (1 kredit per structured query/section).
 
 ## Validation
 
