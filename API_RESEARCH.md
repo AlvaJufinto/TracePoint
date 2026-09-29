@@ -1,9 +1,11 @@
+<!-- @format -->
+
 # TracePoint — Sectors API v2 Research Findings
 
 **Date:** 2026-09-22  
 **API Key status:** Available in `.env` (`VITE_SECTORS_API_KEY`) — must be moved server-side  
 **Base URL:** `https://api.sectors.app/v2/`  
-**Auth:** `Authorization` header with API key
+**Auth:** `Authorization` header with API key.
 
 ---
 
@@ -20,12 +22,14 @@ The current `.env` uses `VITE_SECTORS_API_KEY`. Vite embeds `VITE_*` variables i
 ### 1. Company Report — `GET /v2/company/report/{symbol}/?sections=...`
 
 **Request example:**
+
 ```
 GET /v2/company/report/BBCA/?sections=overview,ownership,management
 Authorization: <api_key>
 ```
 
 **Response shape (BBCA ownership section):**
+
 ```json
 {
   "symbol": "BBCA.JK",
@@ -87,6 +91,7 @@ Authorization: <api_key>
 ### 2. Company Report — Overview section
 
 **Response shape:**
+
 ```json
 {
   "symbol": "BBCA.JK",
@@ -127,6 +132,7 @@ Authorization: <api_key>
 ### 3. Company Report — Management section
 
 **Response shape:**
+
 ```json
 {
   "management": {
@@ -156,30 +162,33 @@ Authorization: <api_key>
 ### 4. Screener — `GET /v2/companies/?q=...` or `?where=...`
 
 **Request examples:**
+
 ```
 GET /v2/companies/?q=PT Dwimuria Investama Andalan&limit=5
 GET /v2/companies/?where=major_shareholders_name like '%Dwimuria%'&limit=5
 ```
 
 **Response shape:**
+
 ```json
 {
-  "results": [
-    { "symbol": "BBCA.JK", "company_name": "PT Bank Central Asia Tbk." },
-    { "symbol": "SSIA.JK", "company_name": "PT Surya Semesta Internusa Tbk" },
-    { "symbol": "TOWR.JK", "company_name": "Sarana Menara Nusantara Tbk" }
-  ],
-  "pagination": {
-    "total_count": 3,
-    "showing": 3,
-    "limit": 5,
-    "offset": 0,
-    "has_next": false
-  }
+	"results": [
+		{ "symbol": "BBCA.JK", "company_name": "PT Bank Central Asia Tbk." },
+		{ "symbol": "SSIA.JK", "company_name": "PT Surya Semesta Internusa Tbk" },
+		{ "symbol": "TOWR.JK", "company_name": "Sarana Menara Nusantara Tbk" }
+	],
+	"pagination": {
+		"total_count": 3,
+		"showing": 3,
+		"limit": 5,
+		"offset": 0,
+		"has_next": false
+	}
 }
 ```
 
 **Query modes:**
+
 - `q`: Natural language — translates to `where` internally (shown in `llm_translation`)
 - `where`: SQL-like filtering with operators `=`, `!=`, `>`, `<`, `like`, `in`
 
@@ -194,12 +203,14 @@ GET /v2/companies/?where=major_shareholders_name like '%Dwimuria%'&limit=5
 ### 5. Free Float — `GET /v2/free-float/`
 
 **Request example:**
+
 ```
 GET /v2/free-float/
 Authorization: <api_key>
 ```
 
 **Response shape:**
+
 ```json
 [
   { "symbol": "BBCA.JK", "company_name": "PT Bank Central Asia Tbk.", "free_float": 0.45058 },
@@ -225,12 +236,14 @@ Authorization: <api_key>
 ### 6. Shareholder Composition — `GET /v2/company/shareholders-composition/{symbol}/`
 
 **Request example:**
+
 ```
 GET /v2/company/shareholders-composition/BBCA.JK/
 Authorization: <api_key>
 ```
 
 **Response shape:**
+
 ```json
 {
   "symbol": "BBCA.JK",
@@ -278,31 +291,46 @@ Authorization: <api_key>
 ### 7. Corporate Actions — `GET /v2/company/corporate-actions/{symbol}/`
 
 **Request example:**
+
 ```
 GET /v2/company/corporate-actions/BBCA.JK/
 Authorization: <api_key>
 ```
 
 **Response shape:**
+
 ```json
 {
-  "symbol": "BBCA.JK",
-  "corporate_actions": {
-    "agm": [
-      { "agm_date": "2026-03-12", "agm_time": "14:00:00", "agm_place": "...", "agm_result": "..." }
-    ],
-    "dividend": [
-      { "ex_date": "2026-08-31", "payment_date": "2026-09-16", "dividend_yield": null, "dividend_amount": 25 },
-      { "ex_date": "2026-03-30", "payment_date": "2026-04-08", "dividend_yield": null, "dividend_amount": 281 }
-    ],
-    "stock_split": [
-      { "date": "2021-10-13", "split_ratio": 5 }
-    ],
-    "bonus": null,
-    "warrant": null,
-    "right_issue": null,
-    "upcoming_dividend": null
-  }
+	"symbol": "BBCA.JK",
+	"corporate_actions": {
+		"agm": [
+			{
+				"agm_date": "2026-03-12",
+				"agm_time": "14:00:00",
+				"agm_place": "...",
+				"agm_result": "..."
+			}
+		],
+		"dividend": [
+			{
+				"ex_date": "2026-08-31",
+				"payment_date": "2026-09-16",
+				"dividend_yield": null,
+				"dividend_amount": 25
+			},
+			{
+				"ex_date": "2026-03-30",
+				"payment_date": "2026-04-08",
+				"dividend_yield": null,
+				"dividend_amount": 281
+			}
+		],
+		"stock_split": [{ "date": "2021-10-13", "split_ratio": 5 }],
+		"bonus": null,
+		"warrant": null,
+		"right_issue": null,
+		"upcoming_dividend": null
+	}
 }
 ```
 
@@ -337,29 +365,29 @@ GET /v2/filings/BBCA.JK/
 
 ### Validation tickers (5 required)
 
-| Ticker | Sector | Major Shareholders | Whale Investors | Conglomerate | Free Float | Notes |
-|--------|--------|-------------------|-----------------|--------------|------------|-------|
-| BBCA.JK | Financials/Banks | PT Dwimuria 54.942%, Public 44.642% | Anthoni Salim | Djarum Group | 0.45058 | 12 major SH, PT Dwimuria is #1 |
-| BREN.JK | Energy | PT Barito Pacific 64.637%, Green Era 22.665% | Prajogo Pangestu | Barito Group | (not tested) | 4 major SH, corporate SH has `symbol: BRPT.JK` |
-| ADRO.JK | Mining | PT Adaro Strategic 48.768%, Public 40.382% | Edwin Soeryadjaya, Garibaldi Thohir | Saratoga, Thohir, Triputra | (not tested) | 6 major SH |
-| AMMN.JK | Mining | PT Sumber Gemilang 32.174%, Public 25.257% | null | Medco Group, Salim Group | (not tested) | 12 major SH, whale_investors is null |
-| TLKM.JK | Communication | PT Danantara 51.57%, Public 41.65% | null | null | (not tested) | 5 major SH, both whale and conglomerate null |
+| Ticker  | Sector           | Major Shareholders                           | Whale Investors                     | Conglomerate               | Free Float   | Notes                                          |
+| ------- | ---------------- | -------------------------------------------- | ----------------------------------- | -------------------------- | ------------ | ---------------------------------------------- |
+| BBCA.JK | Financials/Banks | PT Dwimuria 54.942%, Public 44.642%          | Anthoni Salim                       | Djarum Group               | 0.45058      | 12 major SH, PT Dwimuria is #1                 |
+| BREN.JK | Energy           | PT Barito Pacific 64.637%, Green Era 22.665% | Prajogo Pangestu                    | Barito Group               | (not tested) | 4 major SH, corporate SH has `symbol: BRPT.JK` |
+| ADRO.JK | Mining           | PT Adaro Strategic 48.768%, Public 40.382%   | Edwin Soeryadjaya, Garibaldi Thohir | Saratoga, Thohir, Triputra | (not tested) | 6 major SH                                     |
+| AMMN.JK | Mining           | PT Sumber Gemilang 32.174%, Public 25.257%   | null                                | Medco Group, Salim Group   | (not tested) | 12 major SH, whale_investors is null           |
+| TLKM.JK | Communication    | PT Danantara 51.57%, Public 41.65%           | null                                | null                       | (not tested) | 5 major SH, both whale and conglomerate null   |
 
 ### Trace case — PT Dwimuria Investama Andalan
 
-| Company | SH Name Match | Share % | Share Amount |
-|---------|--------------|---------|-------------|
+| Company | SH Name Match | Share % | Share Amount   |
+| ------- | ------------- | ------- | -------------- |
 | BBCA.JK | ✓ Exact match | 54.942% | 67,729,950,000 |
-| SSIA.JK | ✓ Exact match | 10.24% | 482,000,000 |
+| SSIA.JK | ✓ Exact match | 10.24%  | 482,000,000    |
 | TOWR.JK | ✓ Exact match | 19.954% | 11,792,689,937 |
 
 **Verified:** The PRD trace expectation (BBCA, SSIA, TOWR for PT Dwimuria) matches live API exactly. All three tickers confirmed.
 
 ### Additional tickers tested
 
-| Ticker | Notes |
-|--------|-------|
-| SSIA.JK | PT Dwimuria holds 10.24% — confirmed cross-company trace |
+| Ticker  | Notes                                                     |
+| ------- | --------------------------------------------------------- |
+| SSIA.JK | PT Dwimuria holds 10.24% — confirmed cross-company trace  |
 | TOWR.JK | PT Dwimuria holds 19.954% — confirmed cross-company trace |
 
 ---
@@ -367,6 +395,7 @@ GET /v2/filings/BBCA.JK/
 ## Data Questions Answered
 
 ### Company identity
+
 - **Ticker always `.JK`?** Yes. All API responses use `.JK` suffix.
 - **Both ticker and symbol?** Yes — `symbol` field includes `.JK`. `company_name` is the legal name.
 - **Stable company ID?** No separate ID — `symbol` is the primary key.
@@ -374,6 +403,7 @@ GET /v2/filings/BBCA.JK/
 - **Multiple identifiers?** No — one symbol per company.
 
 ### Ownership
+
 - **Structure:** `major_shareholders` array with name, share_value, share_amount, share_percentage (string), symbol (nullable).
 - **Date/as_of:** **NO DATE FIELD EXISTS.** Cannot manufacture one.
 - **Source/status fields:** No explicit source field. Data is "as reported by Sectors."
@@ -383,6 +413,7 @@ GET /v2/filings/BBCA.JK/
 - **Conglomerate fields:** `conglomerates_group` in ownership is context metadata, NOT ownership.
 
 ### Shareholder names
+
 - **Casing:** Mixed — "PT Dwimuria Investama Andalan", "Public", "Jahja Setiaatmadja"
 - **PT prefixes:** Present on corporate entities
 - **Abbreviations:** None observed in tested data
@@ -395,13 +426,16 @@ GET /v2/filings/BBCA.JK/
 **Normalization strategy:** Trim, collapse whitespace, lowercase for comparison ONLY. Do NOT strip PT prefixes or perform fuzzy matching.
 
 ### Screener
+
 - **`q` mode:** Works for natural language, but less precise
 - **`where` mode:** `major_shareholders_name like '%name%'` is the correct approach for trace searches
 - **Returns:** `symbol` and `company_name` only — no shareholder details
 - **Pagination:** Yes, standard limit/offset
 
 ### Verification
+
 The verification flow works as designed:
+
 1. Screener returns candidate tickers via `major_shareholders_name like`
 2. Company Report ownership returns full shareholder list
 3. Name comparison: exact match after normalization → confirmed
@@ -411,14 +445,14 @@ The verification flow works as designed:
 
 ## PRD Discrepancies Found
 
-| # | PRD Assumption | Reality | Impact |
-|---|---------------|---------|--------|
-| 1 | `/v2/filings/{symbol}/` exists | Endpoint returns "does not exist" | Filings are next-enhancement, not MVP |
-| 2 | Free float endpoint accepts symbol filter | Returns ALL companies, must filter client-side | Need client-side filter |
-| 3 | `share_percentage` is numeric | It's a **string** | Must parse |
-| 4 | Ownership has `as_of` date | No date field exists | Render "Not available" |
-| 5 | `executives_shareholdings.share_percentage` is string | It's a **number** | Inconsistent with major_shareholders |
-| 6 | `VITE_SECTORS_API_KEY` is acceptable | Security violation — key in client bundle | Must move to server |
+| #   | PRD Assumption                                        | Reality                                        | Impact                                |
+| --- | ----------------------------------------------------- | ---------------------------------------------- | ------------------------------------- |
+| 1   | `/v2/filings/{symbol}/` exists                        | Endpoint returns "does not exist"              | Filings are next-enhancement, not MVP |
+| 2   | Free float endpoint accepts symbol filter             | Returns ALL companies, must filter client-side | Need client-side filter               |
+| 3   | `share_percentage` is numeric                         | It's a **string**                              | Must parse                            |
+| 4   | Ownership has `as_of` date                            | No date field exists                           | Render "Not available"                |
+| 5   | `executives_shareholdings.share_percentage` is string | It's a **number**                              | Inconsistent with major_shareholders  |
+| 6   | `VITE_SECTORS_API_KEY` is acceptable                  | Security violation — key in client bundle      | Must move to server                   |
 
 ---
 
@@ -429,44 +463,49 @@ The verification flow works as designed:
 type Ticker = string; // validated: /^[A-Z]{2,5}\.JK$/
 
 interface Company {
-  symbol: Ticker;
-  name: string;           // company_name from API
-  sector?: string;
-  subSector?: string;
-  marketCap?: number;
-  // affiliate metadata — NOT ownership
-  affiliates?: string[];  // context only
+	symbol: Ticker;
+	name: string; // company_name from API
+	sector?: string;
+	subSector?: string;
+	marketCap?: number;
+	// affiliate metadata — NOT ownership
+	affiliates?: string[]; // context only
 }
 
 interface OwnershipHolder {
-  name: string;
-  shareValue: number;      // share_value from API (IDR)
-  shareAmount: number;     // share_amount from API
-  sharePercentage: number; // parsed from string
-  symbol?: string;         // corporate ticker if present (nullable in API)
+	name: string;
+	shareValue: number; // share_value from API (IDR)
+	shareAmount: number; // share_amount from API
+	sharePercentage: number; // parsed from string
+	symbol?: string; // corporate ticker if present (nullable in API)
 }
 
 interface OwnershipSnapshot {
-  symbol: Ticker;
-  companyName: string;
-  holders: OwnershipHolder[];
-  // Context metadata — NOT ownership edges
-  whaleInvestors: string[] | null;
-  conglomeratesGroup: string[] | null;
-  // Date unavailable from API
-  asOf: null;
+	symbol: Ticker;
+	companyName: string;
+	holders: OwnershipHolder[];
+	// Context metadata — NOT ownership edges
+	whaleInvestors: string[] | null;
+	conglomeratesGroup: string[] | null;
+	// Date unavailable from API
+	asOf: null;
 }
 
 interface TraceCandidate {
-  ticker: Ticker;
-  companyName: string;
-  screenerName: string;  // raw name from screener
-  verification?: TraceVerification;
+	ticker: Ticker;
+	companyName: string;
+	screenerName: string; // raw name from screener
+	verification?: TraceVerification;
 }
 
 type TraceVerification =
-  | { status: "confirmed"; screenerName: string; ownershipName: string; ticker: string; }
-  | { status: "mismatch"; screenerName: string; ticker: string; };
+	| {
+			status: "confirmed";
+			screenerName: string;
+			ownershipName: string;
+			ticker: string;
+	  }
+	| { status: "mismatch"; screenerName: string; ticker: string };
 ```
 
 ---
@@ -497,4 +536,4 @@ type TraceVerification =
 
 ---
 
-*Research conducted 2026-09-22. All findings based on live API calls with valid credentials.*
+_Research conducted 2026-09-22. All findings based on live API calls with valid credentials._
