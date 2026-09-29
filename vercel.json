@@ -3,7 +3,15 @@
 	"devCommand": "node node_modules/vite/bin/vite.js --host 127.0.0.1 --port $PORT --strictPort",
 	"rewrites": [
 		{
-			"source": "/((?!api/|src/|node_modules/|@|\\.\\..).*)",
+			"source": "/search",
+			"destination": "/index.html"
+		},
+		{
+			"source": "/trace",
+			"destination": "/index.html"
+		},
+		{
+			"source": "/investigation",
 			"destination": "/index.html"
 		}
 	]

@@ -293,6 +293,7 @@ function buildEntityData(node: GraphData["nodes"][number]): EntityNodeData {
 			label: node.label,
 			subLabel: node.subLabel,
 			nodeType: "company",
+			dotColor: "cyan",
 		};
 	}
 
@@ -301,6 +302,7 @@ function buildEntityData(node: GraphData["nodes"][number]): EntityNodeData {
 			label: node.label,
 			subLabel: node.subLabel,
 			nodeType: "affiliate",
+			dotColor: "orange",
 		};
 	}
 
@@ -309,6 +311,7 @@ function buildEntityData(node: GraphData["nodes"][number]): EntityNodeData {
 			label: node.label,
 			subLabel: node.subLabel,
 			nodeType: "conglomerate",
+			dotColor: "purple",
 		};
 	}
 
@@ -319,6 +322,7 @@ function buildEntityData(node: GraphData["nodes"][number]): EntityNodeData {
 		shareCategory: getShareholderCategory(node.id),
 		sharePercentage: getShareholderPercentage(node.id),
 		bubbleSize: getShareholderBubbleSize(node.id),
+		dotColor: "green",
 	};
 }
 
@@ -431,12 +435,12 @@ function buildEdges(nodes: EntityNode[]): Edge[] {
 				markerEnd: {
 					type: MarkerType.ArrowClosed,
 					width:
-						edge.percentage >= 0.5 ? 14 : edge.percentage >= 0.003 ? 12 : 10,
+						(edge.percentage ?? 0) >= 0.5 ? 14 : (edge.percentage ?? 0) >= 0.003 ? 12 : 10,
 					height:
-						edge.percentage >= 0.5 ? 14 : edge.percentage >= 0.003 ? 12 : 10,
+						(edge.percentage ?? 0) >= 0.5 ? 14 : (edge.percentage ?? 0) >= 0.003 ? 12 : 10,
 					color: "#A1A1AA",
 				},
-				label: `${(edge.percentage * 100).toFixed(3)}%`,
+				label: `${((edge.percentage ?? 0) * 100).toFixed(3)}%`,
 				data: {
 					curve: 78,
 				},
