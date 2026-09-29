@@ -27,8 +27,9 @@ import {
 } from "../../utils/trace/graph";
 import {
 	buildShareholderTraceGraph,
+	mergeShareholderTraceGraphs,
 	shouldShowTraceShareholderAction,
-	type ShareholderConnection,
+	type ShareholderTraceRecord,
 } from "../../utils/trace/shareholder-network";
 import Skeleton from "../Skeleton";
 import Detail from "./Detail";
@@ -57,7 +58,7 @@ type Props = {
 	startTrace: (name: string) => void;
 	closeInspector: () => void;
 	tracedShareholder: string | null;
-	traceConnections: ShareholderConnection[];
+	shareholderTraces: ShareholderTraceRecord[];
 	traceLoading: boolean;
 	traceError: boolean;
 	onRetryTrace: () => void;
@@ -84,7 +85,7 @@ export default function TraceGraph({
 	startTrace,
 	closeInspector,
 	tracedShareholder,
-	traceConnections,
+	shareholderTraces,
 	traceLoading,
 	traceError,
 	onRetryTrace,
@@ -92,34 +93,38 @@ export default function TraceGraph({
 	onClearTrace,
 	onOpenConnectedCompany,
 }: Props) {
-	const tracedShareholderId = tracedShareholder
-		? `sh-${encodeURIComponent(tracedShareholder)}`
-		: null;
-	const expansion = useMemo(() => {
-		if (!tracedShareholder || !tracedShareholderId) {
-			return { nodes: [], edges: [] };
-		}
-		const shareholderNode = reactFlowNodes.find(
-			(node) => node.id === tracedShareholderId,
-		);
+	const { expansion, activeTraceCount } = useMemo(() => {
 		const companyNode = reactFlowNodes.find((node) => node.id === ticker);
-		if (!shareholderNode || !companyNode) return { nodes: [], edges: [] };
+		if (!companyNode) {
+			return { expansion: { nodes: [], edges: [] }, activeTraceCount: 0 };
+		}
 
-		return buildShareholderTraceGraph({
-			shareholderId: tracedShareholderId,
-			shareholderName: tracedShareholder,
-			currentTicker: ticker,
-			shareholderNode,
-			companyNode,
-			connections: traceConnections,
+		const traceGraphs = shareholderTraces.map((trace) => {
+			const shareholderId = `sh-${encodeURIComponent(trace.shareholderName)}`;
+			const shareholderNode = reactFlowNodes.find(
+				(node) => node.id === shareholderId,
+			);
+			if (!shareholderNode) return { nodes: [], edges: [] };
+
+			return buildShareholderTraceGraph({
+				shareholderId,
+				shareholderName: trace.shareholderName,
+				currentTicker: ticker,
+				shareholderNode,
+				companyNode,
+				connections: trace.connections,
+			});
 		});
-	}, [
-		tracedShareholder,
-		tracedShareholderId,
-		ticker,
-		reactFlowNodes,
-		traceConnections,
-	]);
+		const activeIndex = shareholderTraces.findIndex(
+			(trace) => trace.shareholderName === tracedShareholder,
+		);
+
+		return {
+			expansion: mergeShareholderTraceGraphs(traceGraphs),
+			activeTraceCount:
+				activeIndex === -1 ? 0 : traceGraphs[activeIndex].nodes.length,
+		};
+	}, [tracedShareholder, ticker, reactFlowNodes, shareholderTraces]);
 	const visibleNodes = [...reactFlowNodes, ...expansion.nodes];
 	const visibleEdges = [
 		...toReactFlowEdges(
@@ -136,7 +141,15 @@ export default function TraceGraph({
 			.map((node) => node.data.shareCategory)
 			.filter(Boolean),
 	);
-	const traceCount = expansion.nodes.length;
+	const traceCount = expansion.edges.length;
+	const selectedHolderTrace = holder
+		? shareholderTraces.find((trace) => trace.shareholderName === holder.name)
+		: undefined;
+	const selectedHolderTraceCount = selectedHolderTrace
+		? selectedHolderTrace.connections.filter(
+				(connection) => connection.ticker !== ticker,
+			).length
+		: activeTraceCount;
 
 	return (
 		<section
@@ -261,7 +274,7 @@ export default function TraceGraph({
 								color="#9C9C9C17"
 							/>
 							<FitWhenReady
-								changeKey={`${tracedShareholder || "base"}-${traceCount}`}
+								changeKey={`${shareholderTraces.map((trace) => trace.shareholderName).join("|") || "base"}-${traceCount}`}
 							/>
 
 							{tracedShareholder && (
@@ -298,8 +311,8 @@ export default function TraceGraph({
 									) : (
 										<div className="mt-2 flex items-center justify-between gap-3 text-xs text-[var(--color-muted)]">
 											<span>
-												{traceCount > 0
-													? `${traceCount} other confirmed ${traceCount === 1 ? "company" : "companies"} added`
+												{activeTraceCount > 0
+													? `${activeTraceCount} other confirmed ${activeTraceCount === 1 ? "company" : "companies"} added`
 													: "No other confirmed companies found"}
 											</span>
 											{onVerifyNext && (
@@ -406,10 +419,14 @@ export default function TraceGraph({
 										{!isNonTraceableShareholder(holder.name) &&
 										shouldShowTraceShareholderAction({
 											holderName: holder.name,
-											tracedShareholder,
-											traceLoading,
-											traceError,
-											connectedCompanyCount: traceCount,
+											tracedShareholder: selectedHolderTrace
+												? holder.name
+												: tracedShareholder,
+											traceLoading:
+												tracedShareholder === holder.name && traceLoading,
+											traceError:
+												tracedShareholder === holder.name && traceError,
+											connectedCompanyCount: selectedHolderTraceCount,
 										}) ? (
 											<button
 												onClick={() => startTrace(holder.name)}

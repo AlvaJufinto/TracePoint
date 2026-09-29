@@ -11,6 +11,42 @@ export interface ShareholderConnection {
 	source: "current" | "confirmed";
 }
 
+export interface ShareholderTraceRecord {
+	shareholderName: string;
+	connections: ShareholderConnection[];
+}
+
+export function upsertShareholderTrace(
+	traces: ShareholderTraceRecord[],
+	nextTrace: ShareholderTraceRecord,
+): ShareholderTraceRecord[] {
+	const existingIndex = traces.findIndex(
+		(trace) => trace.shareholderName === nextTrace.shareholderName,
+	);
+	if (existingIndex === -1) return [...traces, nextTrace];
+
+	return traces.map((trace, index) =>
+		index === existingIndex ? nextTrace : trace,
+	);
+}
+
+export function mergeShareholderTraceGraphs(
+	graphs: Array<{ nodes: EntityNode[]; edges: Edge[] }>,
+): { nodes: EntityNode[]; edges: Edge[] } {
+	const nodes = new Map<string, EntityNode>();
+	const edges = new Map<string, Edge>();
+	for (const graph of graphs) {
+		for (const node of graph.nodes) {
+			if (!nodes.has(node.id)) nodes.set(node.id, node);
+		}
+		for (const edge of graph.edges) {
+			if (!edges.has(edge.id)) edges.set(edge.id, edge);
+		}
+	}
+
+	return { nodes: [...nodes.values()], edges: [...edges.values()] };
+}
+
 export type CurrentShareholderConnection = Omit<
 	ShareholderConnection,
 	"source"

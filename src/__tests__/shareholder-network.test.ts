@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 import {
 	buildShareholderConnections,
 	buildShareholderTraceGraph,
+	mergeShareholderTraceGraphs,
 	shouldShowTraceShareholderAction,
+	upsertShareholderTrace,
 } from "../utils/trace/shareholder-network";
 import type { TraceCandidate } from "../types/tracepoint";
 
@@ -115,6 +117,65 @@ assert.ok(
 	expansion.nodes[0].position.y < -280,
 	"Connected companies expand away from the target company",
 );
+
+const secondTrace = {
+	shareholderName: "PT Second Holder",
+	connections: [
+		{
+			ticker: "OTHER.JK",
+			companyName: "PT Other Tbk.",
+			sharePercentage: 0.25,
+			shareAmount: 250,
+			source: "confirmed" as const,
+		},
+	],
+};
+const accumulated = upsertShareholderTrace(
+	upsertShareholderTrace([], {
+		shareholderName: "PT Holder",
+		connections,
+	}),
+	secondTrace,
+);
+assert.deepEqual(
+	accumulated.map((trace) => trace.shareholderName),
+	["PT Holder", "PT Second Holder"],
+	"Tracing another shareholder keeps the earlier trace",
+);
+assert.equal(
+	upsertShareholderTrace(accumulated, {
+		shareholderName: "PT Holder",
+		connections: [],
+	}).length,
+	2,
+	"Retracing a shareholder replaces its result without duplicating the trace",
+);
+
+const merged = mergeShareholderTraceGraphs([
+	expansion,
+	{
+		nodes: [
+			{
+				...expansion.nodes[0],
+				id: "trace-company-OTHER.JK",
+				data: { ...expansion.nodes[0].data, label: "OTHER.JK", ticker: "OTHER.JK" },
+			},
+		],
+		edges: [
+			{
+				...expansion.edges[0],
+				id: "trace-edge-PT%20Second%20Holder-OTHER.JK",
+				source: "sh-PT%20Second%20Holder",
+				target: "trace-company-OTHER.JK",
+			},
+		],
+	},
+]);
+assert.deepEqual(
+	merged.nodes.map((node) => node.id),
+	["trace-company-TEST.JK", "trace-company-OTHER.JK"],
+);
+assert.equal(merged.edges.length, 2);
 
 assert.equal(
 	shouldShowTraceShareholderAction({

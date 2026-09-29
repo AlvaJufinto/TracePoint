@@ -10,7 +10,11 @@ import TraceGraph from "../components/Trace/TraceGraph";
 import TraceHeader from "../components/Trace/TraceHeader";
 import { useTraceData } from "../features/trace/hooks/useTraceData";
 import { useTraceGraph } from "../features/trace/hooks/useTraceGraph";
-import { buildShareholderConnections } from "../utils/trace/shareholder-network";
+import {
+	buildShareholderConnections,
+	type ShareholderTraceRecord,
+	upsertShareholderTrace,
+} from "../utils/trace/shareholder-network";
 
 function normalizeTicker(value: string | null) {
 	return (value || "BBCA").trim().toUpperCase().replace(/\.JK$/, "") + ".JK";
@@ -32,11 +36,12 @@ function Investigation({ ticker }: { ticker: string }) {
 	const {
 		panels,
 		retryPanel,
-		traceCandidates,
+		completedTraces,
 		traceLoading,
 		traceError,
 		refreshTrace,
 		verifyNext,
+		clearCompletedTrace,
 		pendingCount,
 	} = useTraceData(ticker, shareholder);
 	const { company, ownership, management, freeFloat, composition, corporateActions } = panels;
@@ -49,24 +54,31 @@ function Investigation({ ticker }: { ticker: string }) {
 	const holder = ownership.data?.holders.find(
 		(item) => "sh-" + encodeURIComponent(item.name) === selectedNode,
 	);
-	const tracedHolder = ownership.data?.holders.find(
-		(item) => item.name === shareholder,
-	);
-	const traceConnections = useMemo(
+	const shareholderTraces = useMemo(
 		() =>
-			buildShareholderConnections(
-				tracedHolder
-					? {
-							ticker,
-							companyName:
-								company.data?.name || ownership.data?.companyName || ticker,
-							sharePercentage: tracedHolder.sharePercentage,
-							shareAmount: tracedHolder.shareAmount,
-						}
-					: null,
-				traceCandidates,
-			),
-		[ticker, company.data, ownership.data, tracedHolder, traceCandidates],
+			completedTraces.reduce<ShareholderTraceRecord[]>((traces, trace) => {
+				const tracedHolder = ownership.data?.holders.find(
+					(item) => item.name === trace.shareholderName,
+				);
+				return upsertShareholderTrace(traces, {
+					shareholderName: trace.shareholderName,
+					connections: buildShareholderConnections(
+						tracedHolder
+							? {
+									ticker,
+									companyName:
+										company.data?.name ||
+										ownership.data?.companyName ||
+										ticker,
+									sharePercentage: tracedHolder.sharePercentage,
+									shareAmount: tracedHolder.shareAmount,
+								}
+							: null,
+						trace.candidates,
+					),
+				});
+			}, []),
+		[ticker, company.data, ownership.data, completedTraces],
 	);
 	const selected =
 		graphData.nodes.find((node) => node.id === selectedNode) ||
@@ -124,12 +136,15 @@ function Investigation({ ticker }: { ticker: string }) {
 				}}
 				closeInspector={() => setSelectedNode(null)}
 				tracedShareholder={shareholder}
-				traceConnections={traceConnections}
+				shareholderTraces={shareholderTraces}
 				traceLoading={traceLoading}
 				traceError={traceError}
 				onRetryTrace={refreshTrace}
 				onVerifyNext={pendingCount ? verifyNext : undefined}
-				onClearTrace={() => updateTraceName(null)}
+				onClearTrace={() => {
+					if (shareholder) clearCompletedTrace(shareholder);
+					updateTraceName(null);
+				}}
 				onOpenConnectedCompany={openConnectedCompany}
 			/>
 

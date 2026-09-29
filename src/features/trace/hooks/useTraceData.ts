@@ -34,6 +34,11 @@ type TracePanels = {
 
 type PanelKey = keyof TracePanels;
 
+type CompletedShareholderTrace = {
+	shareholderName: string;
+	candidates: TraceCandidate[];
+};
+
 function createPanelState<T>(): PanelState<T> {
 	return { status: "loading", data: null, error: null };
 }
@@ -85,6 +90,7 @@ export function useTraceData(ticker: string, shareholder: string | null) {
 		corporateActions: 0,
 	});
 	const [traceCandidates, setTraceCandidates] = useState<TraceCandidate[]>([]);
+	const [completedTraces, setCompletedTraces] = useState<CompletedShareholderTrace[]>([]);
 	const [traceLoading, setTraceLoading] = useState(false);
 	const [traceError, setTraceError] = useState(false);
 	const [traceMore, setTraceMore] = useState(false);
@@ -138,21 +144,31 @@ export function useTraceData(ticker: string, shareholder: string | null) {
 				setTraceCandidates(candidates);
 				setTraceMore(response.hasMore);
 
+				let completedCandidates = candidates;
 				if (candidates.length) {
 					const checked = await verifyTraceCandidates(
 						{ candidates: candidates.slice(0, 5) },
 						controller.signal,
 					);
 					if (!active) return;
-					setTraceCandidates(
-						candidates.map((candidate) => ({
+					completedCandidates = candidates.map((candidate) => ({
 							...candidate,
 							verification: checked.results.find(
 								(item) => item.ticker === candidate.ticker,
 							),
-						})),
-					);
+						}));
+					setTraceCandidates(completedCandidates);
 				}
+				setCompletedTraces((current) => {
+					const nextTrace = { shareholderName: shareholder, candidates: completedCandidates };
+					const existing = current.findIndex(
+						(trace) => trace.shareholderName === shareholder,
+					);
+					if (existing === -1) return [...current, nextTrace];
+					return current.map((trace, index) =>
+						index === existing ? nextTrace : trace,
+					);
+				});
 			} catch (error) {
 				if (
 					active &&
@@ -192,14 +208,22 @@ export function useTraceData(ticker: string, shareholder: string | null) {
 		setTraceError(false);
 		try {
 			const checked = await verifyTraceCandidates({ candidates: pending });
-			setTraceCandidates((current) =>
-				current.map((candidate) => ({
+			const nextCandidates = traceCandidates.map((candidate) => ({
 					...candidate,
 					verification:
 						checked.results.find((item) => item.ticker === candidate.ticker) ||
 						candidate.verification,
-				})),
-			);
+				}));
+			setTraceCandidates(nextCandidates);
+			if (shareholder) {
+				setCompletedTraces((current) =>
+					current.map((trace) =>
+						trace.shareholderName === shareholder
+							? { ...trace, candidates: nextCandidates }
+							: trace,
+					),
+				);
+			}
 		} catch {
 			setTraceError(true);
 		} finally {
@@ -211,11 +235,16 @@ export function useTraceData(ticker: string, shareholder: string | null) {
 		panels,
 		retryPanel,
 		traceCandidates,
+		completedTraces,
 		traceLoading,
 		traceError,
 		traceMore,
 		refreshTrace: () => setTraceRevision((value) => value + 1),
 		verifyNext,
+		clearCompletedTrace: (shareholderName: string) =>
+			setCompletedTraces((current) =>
+				current.filter((trace) => trace.shareholderName !== shareholderName),
+			),
 		pendingCount: traceCandidates.filter(
 			(item) => !item.verification || item.verification.status === "not_found",
 		).length,
