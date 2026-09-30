@@ -21,7 +21,7 @@ export function CustomEntityNode({
 	if (isConnectedCompany) {
 		return (
 			<div
-				className={`relative flex h-[132px] w-[132px] flex-col items-center justify-center rounded-full border-2 px-4 text-center shadow-sm transition-all duration-200 select-none ${selected ? "border-[var(--color-primary)] bg-[var(--color-accent)]/25" : "border-[var(--color-primary)] bg-white hover:bg-[var(--color-accent)]/10"}`}
+				className={`relative flex h-[132px] w-[132px] flex-col items-center justify-center rounded-full border-2 px-4 text-center shadow-sm transition-all duration-200 select-none ${selected ? "border-(--color-primary) bg-(--color-accent)/25" : "border-(--color-primary) bg-white hover:bg-(--color-accent)/10"}`}
 			>
 				{["top", "right", "bottom", "left"].map((id) => (
 					<Handle
@@ -37,20 +37,23 @@ export function CustomEntityNode({
 										? Position.Bottom
 										: Position.Left
 						}
-						className="!h-2.5 !w-2.5 !border-2 !border-white !bg-[var(--color-primary)]"
+						className="!h-2.5 !w-2.5 !border-2 !border-white !bg-(--color-primary)"
 					/>
 				))}
-				<div className="flex items-center gap-1 text-[8px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
+				<div className="flex items-center gap-1 text-[8px] font-bold uppercase tracking-wider text-(--color-muted)">
 					<Building2 size={11} aria-hidden="true" />
 					Connected company
 				</div>
-				<div className="mt-1 text-sm font-bold text-[var(--color-primary)]">
+				<div className="mt-1 text-sm font-bold text-(--color-primary)">
 					{data.label.replace(/\.JK$/, "")}
 				</div>
-				<div className="mt-1 line-clamp-2 text-[9px] leading-tight text-[var(--color-muted)]" title={data.subLabel}>
+				<div
+					className="mt-1 line-clamp-2 text-[9px] leading-tight text-(--color-muted)"
+					title={data.subLabel}
+				>
 					{data.subLabel}
 				</div>
-				<div className="mt-1 text-xs font-bold tabular-nums text-[var(--color-primary)]">
+				<div className="mt-1 text-xs font-bold tabular-nums text-(--color-primary)">
 					{data.sharePercentage == null
 						? "N/A"
 						: `${(data.sharePercentage * 100).toFixed(3)}%`}
@@ -75,23 +78,22 @@ export function CustomEntityNode({
 							? "Minority"
 							: "Shareholder";
 		const categoryClasses = {
-			major: "border-[var(--color-primary)] bg-[var(--color-accent)]/15",
-			corporate:
-				"border-[var(--color-border-strong)] bg-[var(--color-surface)]",
-			minority: "border-[var(--color-border)] bg-white",
+			major: "border-(--color-primary) bg-(--color-accent)/15",
+			corporate: "border-(--color-border-strong) bg-(--color-surface)",
+			minority: "border-(--color-border) bg-white",
 			aggregate:
-				"border-[var(--color-border-strong)] border-dashed bg-[var(--color-surface)]",
-			other: "border-[var(--color-border)] bg-white",
+				"border-(--color-border-strong) border-dashed bg-(--color-surface)",
+			other: "border-(--color-border) bg-white",
 		}[category];
 		const selectedClasses = selected
-			? "border-2 border-[var(--color-primary)] bg-[var(--color-accent)]/20"
+			? "border-2 border-(--color-primary) bg-(--color-accent)/20"
 			: "border";
 		const indicatorClasses = {
-			major: "bg-[var(--color-accent)]",
-			corporate: "bg-[var(--color-border-strong)]",
-			minority: "bg-[var(--color-border)]",
-			aggregate: "border border-[var(--color-border-strong)] bg-transparent",
-			other: "bg-[var(--color-border)]",
+			major: "bg-(--color-accent)",
+			corporate: "bg-(--color-border-strong)",
+			minority: "bg-(--color-border)",
+			aggregate: "border border-(--color-border-strong) bg-transparent",
+			other: "bg-(--color-border)",
 		}[category];
 		return (
 			<div
@@ -120,18 +122,18 @@ export function CustomEntityNode({
 					/>
 				))}
 				<div className="pointer-events-none flex max-w-[88%] flex-col items-center justify-center overflow-hidden">
-					<div className="mb-1 flex items-center gap-1 text-[8px] font-semibold uppercase tracking-[0.08em] text-[var(--color-muted)]">
+					<div className="mb-1 flex items-center gap-1 text-[8px] font-semibold uppercase tracking-[0.08em] text-(--color-muted)">
 						<span className={`h-1.5 w-1.5 shrink-0 ${indicatorClasses}`} />
 						{(isLarge || isMedium) && <span>{categoryLabel}</span>}
 					</div>
 					<div
 						title={data.label}
-						className={`break-words font-semibold leading-tight text-[var(--color-primary)] ${isLarge ? "line-clamp-3 text-xs" : isMedium ? "line-clamp-2 text-[11px]" : "line-clamp-2 text-[10px]"}`}
+						className={`break-words font-semibold leading-tight text-(--color-primary) ${isLarge ? "line-clamp-3 text-xs" : isMedium ? "line-clamp-2 text-[11px]" : "line-clamp-2 text-[10px]"}`}
 					>
 						{data.label}
 					</div>
 					<div
-						className={`mt-1 tabular-nums tracking-tight font-bold text-[var(--color-primary)] ${isLarge ? "text-sm" : isMedium ? "text-xs" : "text-[10px]"}`}
+						className={`mt-1 tabular-nums tracking-tight font-bold text-(--color-primary) ${isLarge ? "text-sm" : isMedium ? "text-xs" : "text-[10px]"}`}
 					>
 						{data.sharePercentage != null
 							? `${(data.sharePercentage * 100).toFixed(2)}%`
@@ -145,7 +147,7 @@ export function CustomEntityNode({
 	if (isCompany)
 		return (
 			<div
-				className={`relative flex h-[92px] w-[240px] flex-col justify-center rounded-[var(--radius-sm)] border px-4 py-3 transition-colors select-none ${selected ? "border-2 border-[var(--color-primary)] bg-[var(--color-accent)]/15" : "border-[var(--color-border-strong)] bg-white hover:border-[var(--color-primary)]"}`}
+				className={`relative flex h-[92px] w-[240px] flex-col justify-center rounded-(--radius-sm) border px-4 py-3 transition-colors select-none ${selected ? "border-2 border-(--color-primary) bg-(--color-accent)/15" : "border-(--color-border-strong) bg-white hover:border-(--color-primary)"}`}
 			>
 				{["top", "right", "bottom", "left"].map((id) => (
 					<Handle
@@ -161,7 +163,7 @@ export function CustomEntityNode({
 										? Position.Bottom
 										: Position.Left
 						}
-						className="!h-2.5 !w-2.5 !border-2 !border-white !bg-[var(--color-primary)]"
+						className="!h-2.5 !w-2.5 !border-2 !border-white !bg-(--color-primary)"
 					/>
 				))}
 				{["top", "right", "bottom", "left"].map((id) => (
@@ -182,25 +184,22 @@ export function CustomEntityNode({
 					/>
 				))}
 				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
+					<div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-(--color-muted)">
 						<Building2 size={13} aria-hidden="true" />
 						<span>Target Company</span>
 					</div>
-					<span
-						className="h-2 w-2 bg-[var(--color-accent)]"
-						title="Active Target"
-					/>
+					<span className="h-2 w-2 bg-(--color-accent)" title="Active Target" />
 				</div>
 				<div className="mt-1">
 					<div
 						title={data.label}
-						className="truncate text-lg font-bold tracking-tight text-[var(--color-primary)]"
+						className="truncate text-lg font-bold tracking-tight text-(--color-primary)"
 					>
 						{data.label}
 					</div>
 					<div
 						title={data.subLabel}
-						className="truncate text-xs text-[var(--color-muted)]"
+						className="truncate text-xs text-(--color-muted)"
 					>
 						{data.subLabel}
 					</div>
@@ -211,7 +210,7 @@ export function CustomEntityNode({
 	const isAffiliate = data.nodeType === "affiliate";
 	return (
 		<div
-			className={`relative flex min-h-[62px] w-[196px] flex-col justify-center rounded-[var(--radius-sm)] border border-dashed px-3 py-2 transition-colors select-none ${selected ? "border-2 border-[var(--color-primary)] bg-[var(--color-accent)]/10" : "border-[var(--color-border-strong)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]"}`}
+			className={`relative flex min-h-[62px] w-[196px] flex-col justify-center rounded-(--radius-sm) border border-dashed px-3 py-2 transition-colors select-none ${selected ? "border-2 border-(--color-primary) bg-(--color-accent)/10" : "border-(--color-border-strong) bg-(--color-surface) hover:border-(--color-primary)"}`}
 		>
 			{["top", "right", "bottom", "left"].map((id) => (
 				<Handle
@@ -232,20 +231,20 @@ export function CustomEntityNode({
 			))}
 			<div className="flex items-center gap-1.5">
 				<span
-					className="h-1.5 w-1.5 border border-[var(--color-border-strong)]"
+					className="h-1.5 w-1.5 border border-(--color-border-strong)"
 					aria-hidden="true"
 				/>
-				<span className="text-[9px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
+				<span className="text-[9px] font-bold uppercase tracking-wider text-(--color-muted)">
 					{isAffiliate ? "Affiliate Context" : "Conglomerate Group"}
 				</span>
 			</div>
 			<div
-				className="mt-1 truncate text-xs font-semibold text-[var(--color-primary)]"
+				className="mt-1 truncate text-xs font-semibold text-(--color-primary)"
 				title={data.label}
 			>
 				{data.label}
 			</div>
-			<div className="truncate text-[10px] leading-tight text-[var(--color-muted)]">
+			<div className="truncate text-[10px] leading-tight text-(--color-muted)">
 				{data.subLabel}
 			</div>
 		</div>

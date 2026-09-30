@@ -520,7 +520,7 @@ export default function OwnershipSlicing() {
 	};
 
 	return (
-		<div className="relative h-[520px] w-full overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)]">
+		<div className="relative h-[520px] w-full overflow-hidden border border-(--color-border) bg-(--color-surface)">
 			<ReactFlow
 				nodes={reactFlowNodes}
 				edges={edges}
@@ -548,41 +548,41 @@ export default function OwnershipSlicing() {
 				/>
 			</ReactFlow>
 
-			<div className="pointer-events-none absolute bottom-4 left-4 z-10 hidden max-w-[calc(100%-2rem)] flex-col items-start gap-2.5 border border-[var(--color-border)] bg-white/95 px-3 py-2.5 shadow-sm sm:flex">
-				<span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
+			<div className="pointer-events-none absolute bottom-4 left-4 z-10 hidden max-w-[calc(100%-2rem)] flex-col items-start gap-2.5 border border-(--color-border) bg-white/95 px-3 py-2.5 shadow-sm sm:flex">
+				<span className="text-[10px] font-bold uppercase tracking-wider text-(--color-muted)">
 					Legend
 				</span>
 
 				{hasShareholderClassifications && (
 					<div>
-						<p className="mb-1.5 text-[9px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
+						<p className="mb-1.5 text-[9px] font-bold uppercase tracking-wider text-(--color-muted)">
 							Shareholder classification
 						</p>
 						<div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
 							{shareholderCategories.has("major") && (
-								<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-primary)]">
-									<span className="h-2.5 w-2.5 rounded-full border border-[var(--color-primary)] bg-[var(--color-accent)]" />
+								<div className="flex items-center gap-1.5 text-xs font-semibold text-(--color-primary)">
+									<span className="h-2.5 w-2.5 rounded-full border border-(--color-primary) bg-(--color-accent)" />
 									Major shareholder
 								</div>
 							)}
 
 							{shareholderCategories.has("corporate") && (
-								<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)]">
-									<span className="h-2.5 w-2.5 rounded-full border-2 border-[var(--color-border-strong)] bg-[var(--color-surface)]" />
+								<div className="flex items-center gap-1.5 text-xs font-semibold text-(--color-muted-foreground)">
+									<span className="h-2.5 w-2.5 rounded-full border-2 border-(--color-border-strong) bg-(--color-surface)" />
 									Corporate shareholder
 								</div>
 							)}
 
 							{shareholderCategories.has("minority") && (
-								<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)]">
-									<span className="h-2.5 w-2.5 rounded-full border border-[var(--color-border)] bg-white" />
+								<div className="flex items-center gap-1.5 text-xs font-semibold text-(--color-muted-foreground)">
+									<span className="h-2.5 w-2.5 rounded-full border border-(--color-border) bg-white" />
 									Minority shareholder
 								</div>
 							)}
 
 							{shareholderCategories.has("aggregate") && (
-								<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)]">
-									<span className="h-2.5 w-2.5 rounded-full border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface)]" />
+								<div className="flex items-center gap-1.5 text-xs font-semibold text-(--color-muted-foreground)">
+									<span className="h-2.5 w-2.5 rounded-full border border-dashed border-(--color-border-strong) bg-(--color-surface)" />
 									Aggregate holding
 								</div>
 							)}
@@ -591,25 +591,25 @@ export default function OwnershipSlicing() {
 				)}
 
 				{hasConnectionTypes && (
-					<div className="border-t border-[var(--color-border)] pt-2">
-					<p className="mb-1.5 text-[9px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
-						Connection type
-					</p>
-					<div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-						{graphData.ownershipEdges.length > 0 && (
-							<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)]">
-								<span className="w-5 border-t-2 border-[var(--color-border-strong)]" />
-								Direct ownership
-							</div>
-						)}
+					<div className="border-t border-(--color-border) pt-2">
+						<p className="mb-1.5 text-[9px] font-bold uppercase tracking-wider text-(--color-muted)">
+							Connection type
+						</p>
+						<div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+							{graphData.ownershipEdges.length > 0 && (
+								<div className="flex items-center gap-1.5 text-xs font-semibold text-(--color-muted-foreground)">
+									<span className="w-5 border-t-2 border-(--color-border-strong)" />
+									Direct ownership
+								</div>
+							)}
 
-						{graphData.metadataEdges.length > 0 && (
-							<div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted-foreground)]">
-								<span className="w-5 border-t border-dashed border-[var(--color-border-strong)]" />
-								Context / affiliation
-							</div>
-						)}
-					</div>
+							{graphData.metadataEdges.length > 0 && (
+								<div className="flex items-center gap-1.5 text-xs font-semibold text-(--color-muted-foreground)">
+									<span className="w-5 border-t border-dashed border-(--color-border-strong)" />
+									Context / affiliation
+								</div>
+							)}
+						</div>
 					</div>
 				)}
 			</div>

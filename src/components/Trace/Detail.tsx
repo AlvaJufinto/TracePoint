@@ -11,7 +11,7 @@ export default function Detail({
 }) {
 	return (
 		<div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
-			<dt className="text-[var(--color-muted)]">{label}</dt>
+			<dt className="text-(--color-muted)">{label}</dt>
 			<dd className="font-semibold tabular-nums">{value}</dd>
 		</div>
 	);

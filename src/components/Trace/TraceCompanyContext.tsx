@@ -97,7 +97,7 @@ function LocalForeignComparison({
 
 	if (!hasLocalData && !hasForeignData) {
 		return (
-			<p className="mt-4 text-sm text-[var(--color-muted)]">
+			<p className="mt-4 text-sm text-(--color-muted)">
 				Local and foreign share data is not available.
 			</p>
 		);
@@ -115,7 +115,7 @@ function LocalForeignComparison({
 		<div className="mt-5">
 			<div className="grid grid-cols-2 gap-4">
 				<div>
-					<p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
+					<p className="text-[10px] font-bold uppercase tracking-wider text-(--color-muted)">
 						Local
 					</p>
 
@@ -125,7 +125,7 @@ function LocalForeignComparison({
 				</div>
 
 				<div className="text-right">
-					<p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
+					<p className="text-[10px] font-bold uppercase tracking-wider text-(--color-muted)">
 						Foreign
 					</p>
 
@@ -138,14 +138,14 @@ function LocalForeignComparison({
 			<div className="relative mt-5 h-10 overflow-hidden">
 				<div className="absolute inset-0 flex">
 					<div
-						className="h-full bg-[var(--color-primary)]"
+						className="h-full bg-(--color-primary)"
 						style={{
 							width: `${localComparison * 100}%`,
 						}}
 					/>
 
 					<div
-						className="h-full bg-[var(--color-accent)]"
+						className="h-full bg-(--color-accent)"
 						style={{
 							width: `${foreignComparison * 100}%`,
 						}}
@@ -153,7 +153,7 @@ function LocalForeignComparison({
 				</div>
 			</div>
 
-			<div className="mt-2 grid grid-cols-2 gap-4 text-[10px] text-[var(--color-muted)]">
+			<div className="mt-2 grid grid-cols-2 gap-4 text-[10px] text-(--color-muted)">
 				<span>{local?.toLocaleString() ?? "Not available"} shares</span>
 
 				<span className="text-right">
@@ -161,7 +161,7 @@ function LocalForeignComparison({
 				</span>
 			</div>
 
-			<p className="mt-2 text-center text-[10px] text-[var(--color-muted)]">
+			<p className="mt-2 text-center text-[10px] text-(--color-muted)">
 				Comparison of reported local and foreign shares
 			</p>
 		</div>
@@ -194,7 +194,7 @@ function InvestorCategoryPieChart({
 
 	if (!categories.length || total <= 0) {
 		return (
-			<p className="mt-4 text-sm text-[var(--color-muted)]">
+			<p className="mt-4 text-sm text-(--color-muted)">
 				Investor category data is not available.
 			</p>
 		);
@@ -279,18 +279,18 @@ export default function TraceCompanyContext({
 
 	return (
 		<section
-			className="mt-8 border-t border-[var(--color-border)] pt-6"
+			className="mt-8 border-t border-(--color-border) pt-6"
 			aria-label="Supporting company context"
 		>
 			<h2 className="text-xl font-bold">Company context</h2>
 
-			<p className="mt-2 text-sm text-[var(--color-muted)]">
+			<p className="mt-2 text-sm text-(--color-muted)">
 				Supporting information reported by Sectors. Composition dates are
 				separate from ownership dates.
 			</p>
 
 			<div className="mt-5 grid gap-6 lg:grid-cols-2">
-				<div className="min-w-0 border border-[var(--color-border)] bg-white p-5">
+				<div className="min-w-0 border border-(--color-border) bg-white p-5">
 					<h3 className="text-base font-bold">Free float</h3>
 
 					<PanelFeedback
@@ -306,16 +306,13 @@ export default function TraceCompanyContext({
 								{percentage(freeFloat.data?.freeFloat)}
 							</p>
 
-							<p className="mt-2 text-xs text-[var(--color-muted)]">
+							<p className="mt-2 text-xs text-(--color-muted)">
 								Reported by Sectors; not calculated from shareholder holdings.
 							</p>
 						</>
 					)}
 
-					<details
-						open
-						className="mt-6 border-t border-[var(--color-border)] pt-4"
-					>
+					<details open className="mt-6 border-t border-(--color-border) pt-4">
 						<summary className="cursor-pointer font-semibold">
 							Management
 						</summary>
@@ -333,7 +330,7 @@ export default function TraceCompanyContext({
 									<li key={person.name + index} className="text-sm">
 										{person.name}
 
-										<span className="block text-xs text-[var(--color-muted)]">
+										<span className="block text-xs text-(--color-muted)">
 											{person.position}
 										</span>
 									</li>
@@ -347,7 +344,7 @@ export default function TraceCompanyContext({
 					</details>
 				</div>
 
-				<div className="min-w-0 border border-[var(--color-border)] bg-white p-5">
+				<div className="min-w-0 border border-(--color-border) bg-white p-5">
 					<h3 className="text-base font-bold">Shareholder composition</h3>
 
 					<PanelFeedback
@@ -365,7 +362,7 @@ export default function TraceCompanyContext({
 
 					{latest && (
 						<>
-							<p className="mt-2 text-xs text-[var(--color-muted)]">
+							<p className="mt-2 text-xs text-(--color-muted)">
 								Composition snapshot · {latest.date}
 							</p>
 
@@ -375,10 +372,10 @@ export default function TraceCompanyContext({
 								total={latest.sharesNumber}
 							/>
 
-							<div className="mt-6 border-t border-[var(--color-border)] pt-5">
+							<div className="mt-6 border-t border-(--color-border) pt-5">
 								<h4 className="text-sm font-bold">Investor categories</h4>
 
-								<p className="mt-1 text-xs text-[var(--color-muted)]">
+								<p className="mt-1 text-xs text-(--color-muted)">
 									Share distribution by investor category.
 								</p>
 
@@ -391,10 +388,10 @@ export default function TraceCompanyContext({
 					)}
 				</div>
 
-				<div className="min-w-0 border border-[var(--color-border)] bg-white p-5 lg:col-span-2">
+				<div className="min-w-0 border border-(--color-border) bg-white p-5 lg:col-span-2">
 					<h3 className="text-base font-bold">Corporate actions</h3>
 
-					<p className="mt-2 text-xs text-[var(--color-muted)]">
+					<p className="mt-2 text-xs text-(--color-muted)">
 						Company events, not shareholder transactions.
 					</p>
 

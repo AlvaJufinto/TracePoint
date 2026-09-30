@@ -6,7 +6,7 @@ export default function Skeleton({
 }: React.ComponentProps<"div">) {
 	return (
 		<div
-			className={`animate-pulse rounded-[var(--radius-sm)] bg-[var(--color-border)] ${className}`}
+			className={`animate-pulse rounded-(--radius-sm) bg-(--color-border) ${className}`}
 			{...props}
 		/>
 	);

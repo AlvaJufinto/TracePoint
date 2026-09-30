@@ -6,7 +6,6 @@ import { ArrowRight } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 
 import Skeleton from "../components/Skeleton";
-
 import {
 	getCompanyOverview,
 	searchByShareholderName,
@@ -90,7 +89,7 @@ function SearchForm({
 	return (
 		<div className="mx-auto max-w-2xl py-4 sm:py-8 min-h-[800px]">
 			<h1 className="text-3xl font-bold">Find a company</h1>
-			<p className="mt-3 text-[var(--color-muted)]">
+			<p className="mt-3 text-(--color-muted)">
 				Search Indonesian listed companies, then inspect their reported
 				ownership.
 			</p>
@@ -102,7 +101,7 @@ function SearchForm({
 							type="button"
 							aria-pressed={mode === value}
 							onClick={() => setMode(value)}
-							className={`min-h-11 rounded-[var(--radius-sm)] border px-4 font-semibold ${mode === value ? "border-[var(--color-primary)] bg-[var(--color-accent)]" : "border-[var(--color-border)] bg-white hover:bg-gray-50"}`}
+							className={`min-h-11 rounded-(--radius-sm) border px-4 font-semibold ${mode === value ? "border-(--color-primary) bg-(--color-accent)" : "border-(--color-border) bg-white hover:bg-gray-50"}`}
 						>
 							{value === "company" ? "Company" : "Shareholder"}
 						</button>
@@ -126,28 +125,28 @@ function SearchForm({
 								? "BBCA or Bank Central Asia"
 								: "PT Dwimuria Investama Andalan"
 						}
-						className="min-w-0 flex-1 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white px-3 py-3"
+						className="min-w-0 flex-1 rounded-(--radius-sm) border border-(--color-border) bg-white px-3 py-3"
 					/>
 					<button
 						disabled={!query.trim()}
-						className="rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-4 font-bold hover:brightness-95"
+						className="rounded-(--radius-sm) bg-(--color-accent) px-4 font-bold hover:brightness-95"
 					>
 						Search
 					</button>
 				</div>
-				<p className="mt-3 text-xs text-[var(--color-muted)]">
+				<p className="mt-3 text-xs text-(--color-muted)">
 					{mode === "shareholder"
 						? "Results are candidates. Inspect ownership before tracing an exact shareholder name."
 						: "Tickers work with or without the .JK suffix."}
 				</p>
 				<div className="mt-4 flex flex-wrap items-center gap-2">
-					<span className="text-xs text-[var(--color-muted)]">Try</span>
+					<span className="text-xs text-(--color-muted)">Try</span>
 					{["BBCA", "BREN", "ADRO", "AMMN", "TLKM"].map((ticker) => (
 						<button
 							key={ticker}
 							type="button"
 							onClick={() => onSearch(ticker, "company")}
-							className="min-h-11 border border-[var(--color-border)] bg-white px-3 text-xs font-semibold hover:border-[var(--color-primary)]"
+							className="min-h-11 border border-(--color-border) bg-white px-3 text-xs font-semibold hover:border-(--color-primary)"
 						>
 							{ticker}
 						</button>
@@ -156,9 +155,12 @@ function SearchForm({
 			</form>
 			<section aria-live="polite" aria-busy={loading}>
 				{loading && (
-					<div className="divide-y divide-[var(--color-border)] border-y border-[var(--color-border)]">
+					<div className="divide-y divide-(--color-border) border-y border-(--color-border)">
 						{[1, 2, 3].map((i) => (
-							<div key={i} className="flex items-center justify-between gap-4 bg-white p-4">
+							<div
+								key={i}
+								className="flex items-center justify-between gap-4 bg-white p-4"
+							>
 								<div className="min-w-0 space-y-2">
 									<Skeleton className="h-5 w-16" />
 									<Skeleton className="h-4 w-40" />
@@ -174,7 +176,7 @@ function SearchForm({
 				{error && (
 					<div
 						role="alert"
-						className="border border-[var(--color-border)] bg-white p-6"
+						className="border border-(--color-border) bg-white p-6"
 					>
 						<h2 className="text-lg font-bold">Search could not be completed</h2>
 						<p className="mt-2 text-sm">
@@ -202,19 +204,19 @@ function SearchForm({
 							{result.hasMore ? " shown" : ""}
 						</h2>
 						{searchMode === "shareholder" && (
-							<p className="mb-4 text-sm text-[var(--color-muted)]">
+							<p className="mb-4 text-sm text-(--color-muted)">
 								Screener matches are not confirmed ownership relationships.
 							</p>
 						)}
 						{!result.results.length && (
-							<div className="border-t border-[var(--color-border)] py-8">
+							<div className="border-t border-(--color-border) py-8">
 								<h3 className="text-lg">No matching companies</h3>
-								<p className="mt-2 text-[var(--color-muted)]">
+								<p className="mt-2 text-(--color-muted)">
 									Try another ticker or a longer name.
 								</p>
 							</div>
 						)}
-						<div className="divide-y divide-[var(--color-border)] border-y border-[var(--color-border)]">
+						<div className="divide-y divide-(--color-border) border-y border-(--color-border)">
 							{result.results.map((item) => (
 								<Link
 									key={item.ticker}
@@ -228,7 +230,7 @@ function SearchForm({
 										<span className="block text-base font-bold">
 											{item.ticker.replace(/\.JK$/, "")}
 										</span>
-										<span className="mt-1 block text-sm text-[var(--color-muted)]">
+										<span className="mt-1 block text-sm text-(--color-muted)">
 											{item.companyName}
 										</span>
 										{searchMode === "shareholder" && (
@@ -245,7 +247,7 @@ function SearchForm({
 							))}
 						</div>
 						{result.hasMore && (
-							<p className="mt-4 text-sm text-[var(--color-muted)]">
+							<p className="mt-4 text-sm text-(--color-muted)">
 								Showing the first {result.results.length} matches. Refine your
 								search for a specific company.
 							</p>

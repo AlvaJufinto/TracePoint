@@ -57,7 +57,7 @@ export default function TraceResultsDrawer({
 			return (
 				<article
 					key={candidate.ticker}
-					className="border-t border-[var(--color-border)] py-4"
+					className="border-t border-(--color-border) py-4"
 				>
 					<div className="text-base font-bold">
 						{candidate.ticker.replace(/\.JK$/, "")}
@@ -73,7 +73,7 @@ export default function TraceResultsDrawer({
 									: "Candidate · Not checked yet"}
 					</p>
 					{checked?.status === "confirmed" && (
-						<div className="mt-2 text-xs text-[var(--color-muted)]">
+						<div className="mt-2 text-xs text-(--color-muted)">
 							<p className="break-words">{checked.ownershipName}</p>
 							<p className="mt-1">
 								Ownership:{" "}
@@ -99,7 +99,7 @@ export default function TraceResultsDrawer({
 								returnTo: searchLink,
 							})
 						}
-						className="mt-3 inline-flex min-h-11 items-center border border-[var(--color-primary)] px-4 text-sm font-semibold hover:bg-[var(--color-accent)] hover:no-underline"
+						className="mt-3 inline-flex min-h-11 items-center border border-(--color-primary) px-4 text-sm font-semibold hover:bg-(--color-accent) hover:no-underline"
 					>
 						Open company
 					</Link>
@@ -118,12 +118,12 @@ export default function TraceResultsDrawer({
 				if (event.target === event.currentTarget) onClose();
 			}}
 			aria-labelledby="trace-title"
-			className="fixed inset-y-0 left-auto right-0 m-0 h-dvh max-h-none w-full max-w-lg border-l border-[var(--color-border)] bg-white p-0 text-[var(--color-primary)] backdrop:bg-black/20"
+			className="fixed inset-y-0 left-auto right-0 m-0 h-dvh max-h-none w-full max-w-lg border-l border-(--color-border) bg-white p-0 text-(--color-primary) backdrop:bg-black/20"
 		>
 			<div className="flex h-full flex-col">
-				<header className="flex items-start justify-between gap-3 border-b border-[var(--color-border)] p-5">
+				<header className="flex items-start justify-between gap-3 border-b border-(--color-border) p-5">
 					<div className="min-w-0">
-						<p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)]">
+						<p className="text-xs font-semibold uppercase tracking-wider text-(--color-muted)">
 							Tracing from {origin}
 						</p>
 						<h2 id="trace-title" className="mt-2 break-words text-xl font-bold">
@@ -139,7 +139,7 @@ export default function TraceResultsDrawer({
 					</button>
 				</header>
 				<div className="min-h-0 flex-1 overflow-y-auto p-5">
-					<p className="mb-5 text-sm text-[var(--color-muted)]">
+					<p className="mb-5 text-sm text-(--color-muted)">
 						A candidate becomes a confirmed name match only when its ownership
 						report lists this exact shareholder name. This does not establish
 						beneficial ownership.
@@ -154,7 +154,7 @@ export default function TraceResultsDrawer({
 						{error && (
 							<div
 								role="alert"
-								className="mb-4 border border-[var(--color-border)] p-4 text-sm"
+								className="mb-4 border border-(--color-border) p-4 text-sm"
 							>
 								<p>
 									Trace could not be completed. Your investigation is still
@@ -174,7 +174,7 @@ export default function TraceResultsDrawer({
 								<h3 className="text-lg font-bold">
 									No candidate companies returned
 								</h3>
-								<p className="mt-2 text-sm text-[var(--color-muted)]">
+								<p className="mt-2 text-sm text-(--color-muted)">
 									Sectors did not return matches for this name. This does not
 									prove that other holdings do not exist.
 								</p>
@@ -201,19 +201,19 @@ export default function TraceResultsDrawer({
 						<button
 							disabled={isLoading}
 							onClick={onVerifyNext}
-							className="mt-4 min-h-11 w-full bg-[var(--color-accent)] px-4 font-bold hover:brightness-95"
+							className="mt-4 min-h-11 w-full bg-(--color-accent) px-4 font-bold hover:brightness-95"
 						>
 							Check next candidates / retry failed checks
 						</button>
 					)}
 					{hasMore && (
-						<p className="mt-4 text-xs text-[var(--color-muted)]">
+						<p className="mt-4 text-xs text-(--color-muted)">
 							Showing the first 20 screener candidates. Additional matches may
 							exist.
 						</p>
 					)}
 				</div>
-				<footer className="border-t border-[var(--color-border)] p-5 text-xs text-[var(--color-muted)]">
+				<footer className="border-t border-(--color-border) p-5 text-xs text-(--color-muted)">
 					Only five candidates are checked per action. Unconfirmed candidates
 					are never added as ownership relationships.
 				</footer>

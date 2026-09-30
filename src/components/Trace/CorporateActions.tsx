@@ -40,13 +40,13 @@ export default function CorporateActions({
 			</p>
 		);
 	return (
-		<ul className="mt-4 divide-y divide-[var(--color-border)]">
+		<ul className="mt-4 divide-y divide-(--color-border)">
 			{events.map((event, index) => (
 				<li
 					className="grid gap-1 py-3 text-sm sm:grid-cols-[120px_140px_1fr]"
 					key={event.label + event.date + index}
 				>
-					<span className="text-[var(--color-muted)]">
+					<span className="text-(--color-muted)">
 						{event.date || "Not available"}
 					</span>
 					<strong>{event.label}</strong>
