@@ -29,7 +29,6 @@ import {
 	buildShareholderTraceGraph,
 	mergeShareholderTraceGraphs,
 	type ShareholderTraceRecord,
-	shouldShowTraceShareholderAction,
 } from "../../utils/trace/shareholder-network";
 import Skeleton from "../Skeleton";
 import Detail from "./Detail";
@@ -55,7 +54,6 @@ type Props = {
 	setFlow: (instance: ReactFlowInstance) => void;
 	inspect: (id: string) => void;
 	clearSelection: () => void;
-	startTrace: (name: string) => void;
 	closeInspector: () => void;
 	tracedShareholder: string | null;
 	shareholderTraces: ShareholderTraceRecord[];
@@ -82,7 +80,6 @@ export default function TraceGraph({
 	setFlow,
 	inspect,
 	clearSelection,
-	startTrace,
 	closeInspector,
 	tracedShareholder,
 	shareholderTraces,
@@ -141,14 +138,6 @@ export default function TraceGraph({
 			.filter(Boolean),
 	);
 	const traceCount = expansion.edges.length;
-	const selectedHolderTrace = holder
-		? shareholderTraces.find((trace) => trace.shareholderName === holder.name)
-		: undefined;
-	const selectedHolderTraceCount = selectedHolderTrace
-		? selectedHolderTrace.connections.filter(
-				(connection) => connection.ticker !== ticker,
-			).length
-		: activeTraceCount;
 
 	return (
 		<section
@@ -467,34 +456,14 @@ export default function TraceGraph({
 
 										<p className="mt-4 border-t border-(--color-border) pt-4 text-xs text-(--color-muted)">
 											Reported by Sectors
-											<br />
-											Ownership date unavailable
 										</p>
 
-										{!isNonTraceableShareholder(holder.name) &&
-										shouldShowTraceShareholderAction({
-											holderName: holder.name,
-											tracedShareholder: selectedHolderTrace
-												? holder.name
-												: tracedShareholder,
-											traceLoading:
-												tracedShareholder === holder.name && traceLoading,
-											traceError:
-												tracedShareholder === holder.name && traceError,
-											connectedCompanyCount: selectedHolderTraceCount,
-										}) ? (
-											<button
-												onClick={() => startTrace(holder.name)}
-												className="mt-4 min-h-11 w-full bg-(--color-accent) px-4 font-bold hover:brightness-95"
-											>
-												Trace shareholder
-											</button>
-										) : isNonTraceableShareholder(holder.name) ? (
+										{isNonTraceableShareholder(holder.name) && (
 											<p className="mt-4 text-sm">
-												This aggregate entry does not identify a single
-												shareholder and cannot be traced.
+												This entry represents shares reported collectively under an
+												aggregate ownership category.
 											</p>
-										) : null}
+										)}
 
 										{holder.symbol && (
 											<Link

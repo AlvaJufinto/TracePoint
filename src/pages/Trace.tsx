@@ -130,10 +130,6 @@ function Investigation({ ticker }: { ticker: string }) {
 				setFlow={setFlow}
 				inspect={setSelectedNode}
 				clearSelection={() => setSelectedNode(null)}
-				startTrace={(name) => {
-					updateTraceName(name);
-					setSelectedNode(null);
-				}}
 				closeInspector={() => setSelectedNode(null)}
 				tracedShareholder={shareholder}
 				shareholderTraces={shareholderTraces}

@@ -22,6 +22,7 @@ import type {
 	TracePointManagement,
 	TracePointOwnershipSnapshot,
 } from "../../../types/tracepoint";
+import { getAutoTraceShareholderNames } from "../../../utils/trace/shareholder-network";
 
 type TracePanels = {
 	company: PanelState<TracePointCompany>;
@@ -38,6 +39,7 @@ type CompletedShareholderTrace = {
 	shareholderName: string;
 	candidates: TraceCandidate[];
 };
+
 
 function createPanelState<T>(): PanelState<T> {
 	return { status: "loading", data: null, error: null };
@@ -186,6 +188,68 @@ export function useTraceData(ticker: string, shareholder: string | null) {
 			controller.abort();
 		};
 	}, [shareholder, traceRevision]);
+
+	useEffect(() => {
+		if (panels.ownership.status !== "success" || !panels.ownership.data) return;
+
+		const shareholderNames = getAutoTraceShareholderNames(
+			panels.ownership.data.holders,
+		);
+		let active = true;
+		const controller = new AbortController();
+
+		void (async () => {
+			for (const shareholderName of shareholderNames) {
+				if (!active) return;
+				try {
+					const response = await searchByShareholderName(
+						shareholderName,
+						20,
+						controller.signal,
+					);
+					let candidates: TraceCandidate[] = response.results.map((item) => ({
+						...item,
+						screenerName: shareholderName,
+					}));
+
+					for (let offset = 0; offset < candidates.length; offset += 5) {
+						const checked = await verifyTraceCandidates(
+							{ candidates: candidates.slice(offset, offset + 5), maxBatch: 5 },
+							controller.signal,
+						);
+						candidates = candidates.map((candidate) => ({
+							...candidate,
+							verification:
+								checked.results.find((item) => item.ticker === candidate.ticker) ||
+								candidate.verification,
+						}));
+					}
+
+					if (!active) return;
+					setCompletedTraces((current) => {
+						const nextTrace = { shareholderName, candidates };
+						const existing = current.findIndex(
+							(trace) => trace.shareholderName === shareholderName,
+						);
+						if (existing === -1) return [...current, nextTrace];
+						return current.map((trace, index) =>
+							index === existing ? nextTrace : trace,
+						);
+					});
+				} catch (error) {
+					if (error instanceof DOMException && error.name === "AbortError") return;
+					console.error("Automatic shareholder trace failed", {
+						shareholderName,
+					});
+				}
+			}
+		})();
+
+		return () => {
+			active = false;
+			controller.abort();
+		};
+	}, [ticker, panels.ownership.status, panels.ownership.data]);
 
 	function retryPanel(key: string) {
 		if (!(key in revisions)) return;

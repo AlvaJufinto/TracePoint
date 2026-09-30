@@ -85,7 +85,7 @@ export default function TraceResultsDrawer({
 								Shares:{" "}
 								{checked.shareAmount?.toLocaleString() ?? "Not available"}
 							</p>
-							<p>Ownership date unavailable</p>
+
 						</div>
 					)}
 					<Link

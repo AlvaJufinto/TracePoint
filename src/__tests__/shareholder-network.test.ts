@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import {
 	buildShareholderConnections,
 	buildShareholderTraceGraph,
+	getAutoTraceShareholderNames,
 	mergeShareholderTraceGraphs,
-	shouldShowTraceShareholderAction,
 	upsertShareholderTrace,
 } from "../utils/trace/shareholder-network";
 import type { TraceCandidate } from "../types/tracepoint";
@@ -177,27 +177,16 @@ assert.deepEqual(
 );
 assert.equal(merged.edges.length, 2);
 
-assert.equal(
-	shouldShowTraceShareholderAction({
-		holderName: "PT Holder",
-		tracedShareholder: "PT Holder",
-		traceLoading: false,
-		traceError: false,
-		connectedCompanyCount: 0,
-	}),
-	false,
-	"The trace action is hidden after a completed trace finds no other companies",
-);
-assert.equal(
-	shouldShowTraceShareholderAction({
-		holderName: "PT Holder",
-		tracedShareholder: null,
-		traceLoading: false,
-		traceError: false,
-		connectedCompanyCount: 0,
-	}),
-	true,
-	"The trace action remains available before a trace has been attempted",
+assert.deepEqual(
+	getAutoTraceShareholderNames([
+		{ name: "PT Holder" },
+		{ name: "Public" },
+		{ name: "PT Second Holder" },
+		{ name: "Treasury Stock" },
+		{ name: "PT Holder" },
+	]),
+	["PT Holder", "PT Second Holder"],
+	"Auto trace includes every identifiable shareholder once and skips aggregate rows",
 );
 
 console.log("✓ Shareholder network contains current and confirmed ownership connections only");

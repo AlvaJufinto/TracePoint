@@ -2,6 +2,7 @@ import { MarkerType, type Edge } from "reactflow";
 
 import type { EntityNode } from "../../interfaces/trace";
 import type { TraceCandidate } from "../../types/tracepoint";
+import { isNonTraceableShareholder } from "./graph";
 
 export interface ShareholderConnection {
 	ticker: string;
@@ -14,6 +15,18 @@ export interface ShareholderConnection {
 export interface ShareholderTraceRecord {
 	shareholderName: string;
 	connections: ShareholderConnection[];
+}
+
+export function getAutoTraceShareholderNames(
+	holders: Array<{ name: string }>,
+): string[] {
+	return [
+		...new Set(
+			holders
+				.map((holder) => holder.name.trim())
+				.filter((name) => name && !isNonTraceableShareholder(name)),
+		),
+	];
 }
 
 export function upsertShareholderTrace(
@@ -76,28 +89,6 @@ export function buildShareholderConnections(
 	}
 
 	return [...connections.values()];
-}
-
-export function shouldShowTraceShareholderAction({
-	holderName,
-	tracedShareholder,
-	traceLoading,
-	traceError,
-	connectedCompanyCount,
-}: {
-	holderName: string;
-	tracedShareholder: string | null;
-	traceLoading: boolean;
-	traceError: boolean;
-	connectedCompanyCount: number;
-}): boolean {
-	const completedWithoutConnections =
-		tracedShareholder === holderName &&
-		!traceLoading &&
-		!traceError &&
-		connectedCompanyCount === 0;
-
-	return !completedWithoutConnections;
 }
 
 type BuildTraceGraphInput = {
