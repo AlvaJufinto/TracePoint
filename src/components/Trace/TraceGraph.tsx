@@ -242,9 +242,14 @@ export default function TraceGraph({
 							onInit={setFlow}
 							onNodeClick={(_, node) => {
 								if (node.data.companyRole === "connected" && node.data.ticker) {
-									onOpenConnectedCompany(node.data.ticker);
+									window.open(
+										`/trace?ticker=${encodeURIComponent(node.data.ticker)}`,
+										"_blank",
+										"noopener,noreferrer",
+									);
 									return;
 								}
+
 								inspect(node.id);
 							}}
 							onEdgeClick={(_, edge) =>
