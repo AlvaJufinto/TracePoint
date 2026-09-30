@@ -8,7 +8,6 @@ const traceApi = import.meta.env.VITE_TRACE_DATA_SOURCE === 'fixtures'
 export const getCompanyOverview = traceApi.getCompanyOverview;
 export const getCompanyOwnership = traceApi.getCompanyOwnership;
 export const getCompanyManagement = traceApi.getCompanyManagement;
-export const getFreeFloat = traceApi.getFreeFloat;
 export const getShareholderComposition = traceApi.getShareholderComposition;
 export const getCorporateActions = traceApi.getCorporateActions;
 export const searchByShareholderName = traceApi.searchByShareholderName;

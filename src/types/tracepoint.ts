@@ -84,16 +84,6 @@ export interface TracePointManagement {
 }
 
 // ---------------------------------------------------------------------------
-// Free Float
-// ---------------------------------------------------------------------------
-
-export interface TracePointFreeFloat {
-  ticker: string;
-  companyName: string;
-  freeFloat: number | null;       // Decimal, e.g. 0.45058
-}
-
-// ---------------------------------------------------------------------------
 // Shareholder Composition
 // ---------------------------------------------------------------------------
 

@@ -13,7 +13,6 @@ import type {
   TracePointOwnershipSnapshot,
   TracePointShareholder,
   TracePointScreenerResponse,
-  TracePointFreeFloat,
   TracePointComposition,
   TracePointCorporateActions,
   TraceVerification,
@@ -84,15 +83,6 @@ export function isTracePointScreenerResponse(data: unknown): data is TracePointS
 // ---------------------------------------------------------------------------
 // Free float guard
 // ---------------------------------------------------------------------------
-
-export function isTracePointFreeFloat(data: unknown): data is TracePointFreeFloat {
-  if (!data || typeof data !== 'object') return false;
-  const d = data as Record<string, unknown>;
-  if (typeof d.ticker !== 'string') return false;
-  if (typeof d.companyName !== 'string') return false;
-  if (d.freeFloat !== null && (typeof d.freeFloat !== 'number' || !Number.isFinite(d.freeFloat))) return false;
-  return true;
-}
 
 // ---------------------------------------------------------------------------
 // Composition guard

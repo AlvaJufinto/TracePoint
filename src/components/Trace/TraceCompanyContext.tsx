@@ -6,7 +6,6 @@ import type {
 	PanelState,
 	TracePointComposition,
 	TracePointCorporateActions,
-	TracePointFreeFloat,
 	TracePointManagement,
 } from "../../types/tracepoint";
 import { percentage } from "../../utils/trace/format";
@@ -14,7 +13,6 @@ import CorporateActions from "./CorporateActions";
 import PanelFeedback from "./PanelFeedback";
 
 type Props = {
-	freeFloat: PanelState<TracePointFreeFloat>;
 	management: PanelState<TracePointManagement>;
 	composition: PanelState<TracePointComposition>;
 	corporateActions: PanelState<TracePointCorporateActions>;
@@ -269,7 +267,6 @@ function InvestorCategoryPieChart({
 }
 
 export default function TraceCompanyContext({
-	freeFloat,
 	management,
 	composition,
 	corporateActions,
@@ -290,60 +287,6 @@ export default function TraceCompanyContext({
 			</p>
 
 			<div className="mt-5 grid gap-6 lg:grid-cols-2">
-				<div className="min-w-0 border border-(--color-border) bg-white p-5">
-					<h3 className="text-base font-bold">Free float</h3>
-
-					<PanelFeedback
-						state={freeFloat}
-						label="free float"
-						retry={() => retry("freeFloat")}
-						variant="value"
-					/>
-
-					{freeFloat.status === "success" && (
-						<>
-							<p className="mt-3 text-2xl font-bold">
-								{percentage(freeFloat.data?.freeFloat)}
-							</p>
-
-							<p className="mt-2 text-xs text-(--color-muted)">
-								Reported by Sectors; not calculated from shareholder holdings.
-							</p>
-						</>
-					)}
-
-					<details open className="mt-6 border-t border-(--color-border) pt-4">
-						<summary className="cursor-pointer font-semibold">
-							Management
-						</summary>
-
-						<PanelFeedback
-							state={management}
-							label="management"
-							retry={() => retry("management")}
-							variant="list"
-						/>
-
-						{management.data?.keyExecutives.length ? (
-							<ul className="mt-3 space-y-3">
-								{management.data.keyExecutives.map((person, index) => (
-									<li key={person.name + index} className="text-sm">
-										{person.name}
-
-										<span className="block text-xs text-(--color-muted)">
-											{person.position}
-										</span>
-									</li>
-								))}
-							</ul>
-						) : (
-							management.status === "success" && (
-								<p className="mt-3 text-sm">No management records available.</p>
-							)
-						)}
-					</details>
-				</div>
-
 				<div className="min-w-0 border border-(--color-border) bg-white p-5">
 					<h3 className="text-base font-bold">Shareholder composition</h3>
 
@@ -385,6 +328,38 @@ export default function TraceCompanyContext({
 								/>
 							</div>
 						</>
+					)}
+				</div>
+				<div className="min-w-0 border border-(--color-border) bg-white p-5">
+					<h3 className="text-base font-bold">Company management</h3>
+
+					<p className="mt-2 text-xs text-(--color-muted)">
+						Key executives and management positions.
+					</p>
+
+					<PanelFeedback
+						state={management}
+						label="management"
+						retry={() => retry("management")}
+						variant="list"
+					/>
+
+					{management.data?.keyExecutives.length ? (
+						<ul className="mt-4 space-y-3">
+							{management.data.keyExecutives.map((person, index) => (
+								<li key={person.name + index} className="text-sm">
+									{person.name}
+
+									<span className="block text-xs text-(--color-muted)">
+										{person.position}
+									</span>
+								</li>
+							))}
+						</ul>
+					) : (
+						management.status === "success" && (
+							<p className="mt-3 text-sm">No management records available.</p>
+						)
 					)}
 				</div>
 

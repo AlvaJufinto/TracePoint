@@ -44,7 +44,7 @@ function Investigation({ ticker }: { ticker: string }) {
 		clearCompletedTrace,
 		pendingCount,
 	} = useTraceData(ticker, shareholder);
-	const { company, ownership, management, freeFloat, composition, corporateActions } = panels;
+	const { company, ownership, management, composition, corporateActions } = panels;
 	const { graphData, reactFlowNodes, layoutError, setFlow } = useTraceGraph(
 		ticker,
 		company.data,
@@ -145,7 +145,6 @@ function Investigation({ ticker }: { ticker: string }) {
 			/>
 
 			<TraceCompanyContext
-				freeFloat={freeFloat}
 				management={management}
 				composition={composition}
 				corporateActions={corporateActions}

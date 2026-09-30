@@ -3,7 +3,6 @@ import type {
   TracePointCompany,
   TracePointComposition,
   TracePointCorporateActions,
-  TracePointFreeFloat,
   TracePointManagement,
   TracePointOwnershipSnapshot,
   TracePointScreenerResponse,
@@ -14,7 +13,6 @@ interface FixtureCompany {
   overview: TracePointCompany;
   ownership: TracePointOwnershipSnapshot;
   management: TracePointManagement;
-  freeFloat: TracePointFreeFloat;
   composition: TracePointComposition;
   corporateActions: TracePointCorporateActions;
 }
@@ -99,10 +97,6 @@ export async function getCompanyOwnership(ticker: string): Promise<TracePointOwn
 
 export async function getCompanyManagement(ticker: string): Promise<TracePointManagement> {
   return (await companyFor(ticker)).management;
-}
-
-export async function getFreeFloat(ticker: string): Promise<TracePointFreeFloat> {
-  return (await companyFor(ticker)).freeFloat;
 }
 
 export async function getShareholderComposition(ticker: string): Promise<TracePointComposition> {

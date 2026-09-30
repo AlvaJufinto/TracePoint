@@ -9,7 +9,6 @@ import assert from 'node:assert/strict';
 import {
   isTracePointComposition,
   isTracePointCorporateActions,
-  isTracePointFreeFloat,
   isTracePointOwnershipSnapshot,
 } from '../lib/guards';
 
@@ -26,9 +25,6 @@ assert.ok(
   isTracePointOwnershipSnapshot(ownership),
   'ownership response must match TracePointOwnershipSnapshot',
 );
-
-const freeFloat = await get('/api/company-free-float?ticker=BBCA.JK');
-assert.ok(isTracePointFreeFloat(freeFloat), 'free-float response must match TracePointFreeFloat');
 
 const composition = await get('/api/company-composition?ticker=BBCA.JK');
 assert.ok(

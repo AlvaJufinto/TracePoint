@@ -8,7 +8,6 @@ import assert from 'node:assert/strict';
 import {
   getCompanyOwnership,
   getCompanyManagement,
-  getFreeFloat,
   getShareholderComposition,
   getCorporateActions,
 } from '../lib/tracepoint-api';
@@ -26,7 +25,6 @@ globalThis.fetch = (async (input: string | URL | Request) => {
 const calls = [
   getCompanyOwnership('BBCA.JK'),
   getCompanyManagement('BBCA.JK'),
-  getFreeFloat('BBCA.JK'),
   getShareholderComposition('BBCA.JK'),
   getCorporateActions('BBCA.JK'),
 ];
@@ -36,7 +34,6 @@ await Promise.allSettled(calls);
 assert.deepEqual(requestedUrls, [
   '/api/company-ownership?ticker=BBCA.JK',
   '/api/company-management?ticker=BBCA.JK',
-  '/api/company-free-float?ticker=BBCA.JK',
   '/api/company-composition?ticker=BBCA.JK',
   '/api/company-corporate-actions?ticker=BBCA.JK',
 ]);

@@ -227,7 +227,6 @@ my-app/
 │   ├── company-overview.ts
 │   ├── company-ownership.ts
 │   ├── company-management.ts
-│   ├── company-free-float.ts
 │   ├── company-composition.ts
 │   ├── company-corporate-actions.ts
 │   ├── search.ts
@@ -267,7 +266,6 @@ The frontend calls these relative endpoints:
 - `GET /api/company-overview?ticker=...`
 - `GET /api/company-ownership?ticker=...`
 - `GET /api/company-management?ticker=...`
-- `GET /api/company-free-float?ticker=...`
 - `GET /api/company-composition?ticker=...`
 - `GET /api/company-corporate-actions?ticker=...`
 

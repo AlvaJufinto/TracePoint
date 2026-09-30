@@ -7,7 +7,6 @@ import {
 	getCompanyOverview,
 	getCompanyOwnership,
 	getCorporateActions,
-	getFreeFloat,
 	getShareholderComposition,
 	searchByShareholderName,
 	verifyTraceCandidates,
@@ -18,7 +17,6 @@ import type {
 	TracePointCompany,
 	TracePointComposition,
 	TracePointCorporateActions,
-	TracePointFreeFloat,
 	TracePointManagement,
 	TracePointOwnershipSnapshot,
 } from "../../../types/tracepoint";
@@ -28,7 +26,6 @@ type TracePanels = {
 	company: PanelState<TracePointCompany>;
 	ownership: PanelState<TracePointOwnershipSnapshot>;
 	management: PanelState<TracePointManagement>;
-	freeFloat: PanelState<TracePointFreeFloat>;
 	composition: PanelState<TracePointComposition>;
 	corporateActions: PanelState<TracePointCorporateActions>;
 };
@@ -87,7 +84,6 @@ export function useTraceData(ticker: string, shareholder: string | null) {
 		company: 0,
 		ownership: 0,
 		management: 0,
-		freeFloat: 0,
 		composition: 0,
 		corporateActions: 0,
 	});
@@ -105,7 +101,6 @@ export function useTraceData(ticker: string, shareholder: string | null) {
 			revisions.management,
 			getCompanyManagement,
 		),
-		freeFloat: useTracePanel(ticker, revisions.freeFloat, getFreeFloat),
 		composition: useTracePanel(
 			ticker,
 			revisions.composition,

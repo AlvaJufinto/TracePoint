@@ -4,7 +4,6 @@ import {
   isTracePointCompany,
   isTracePointComposition,
   isTracePointCorporateActions,
-  isTracePointFreeFloat,
   isTracePointOwnershipSnapshot,
   isTracePointScreenerResponse,
   isTraceVerification,
@@ -19,7 +18,6 @@ const fixture = JSON.parse(readFileSync(fixturePath, 'utf8')) as {
     overview: unknown;
     ownership: unknown;
     management: unknown;
-    freeFloat: unknown;
     composition: unknown;
     corporateActions: unknown;
   }>;
@@ -32,13 +30,12 @@ function assert(condition: boolean, message: string): asserts condition {
 }
 
 assert(fixture.meta.source === 'live-sectors-api', 'Fixture provenance must be explicit');
-assert(fixture.meta.liveApiCallsUsed === 9, 'Fixture capture request count changed unexpectedly');
+assert(fixture.meta.liveApiCallsUsed === 8, 'Fixture capture request count changed unexpectedly');
 assert(/^\d{4}-\d{2}-\d{2}$/.test(fixture.meta.capturedAt), 'capturedAt must be YYYY-MM-DD');
 
 for (const [ticker, company] of Object.entries(fixture.companies)) {
   assert(isTracePointCompany(company.overview), `${ticker}: invalid overview`);
   assert(isTracePointOwnershipSnapshot(company.ownership), `${ticker}: invalid ownership`);
-  assert(isTracePointFreeFloat(company.freeFloat), `${ticker}: invalid free float`);
   assert(isTracePointComposition(company.composition), `${ticker}: invalid composition`);
   assert(isTracePointCorporateActions(company.corporateActions), `${ticker}: invalid corporate actions`);
 

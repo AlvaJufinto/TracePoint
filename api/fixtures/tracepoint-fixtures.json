@@ -3,14 +3,13 @@
     "schemaVersion": 1,
     "source": "live-sectors-api",
     "capturedAt": "2026-09-29",
-    "liveApiCallsUsed": 9,
+    "liveApiCallsUsed": 8,
     "estimatedCreditsUsed": 11,
     "dataShape": "TracePoint internal normalized contracts",
     "completeness": "BBCA detail fixture with verified Dwimuria cross-company trace",
     "notes": [
       "Fixture scope is BBCA.JK only.",
       "Raw BBCA responses are stored in api/fixtures/raw.",
-      "Free float was not refreshed because that endpoint costs 10 credits; the value is from the documented 2026-09-22 capture.",
       "Ownership asOf remains null because Sectors does not expose that date.",
       "Dwimuria trace candidates and SSIA/TOWR ownership sections were captured with three bounded live requests on 2026-09-29."
     ]
@@ -273,11 +272,6 @@
             "sharePercentage": 3e-05
           }
         ]
-      },
-      "freeFloat": {
-        "ticker": "BBCA.JK",
-        "companyName": "PT Bank Central Asia Tbk.",
-        "freeFloat": 0.45058
       },
       "composition": {
         "ticker": "BBCA.JK",

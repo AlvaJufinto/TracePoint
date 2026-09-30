@@ -9,7 +9,6 @@ const expectedRequests = [
   'getCompanyOverview',
   'getCompanyOwnership',
   'getCompanyManagement',
-  'getFreeFloat',
   'getShareholderComposition',
   'getCorporateActions',
 ];
@@ -31,5 +30,5 @@ function visit(node: ts.Node) {
   ts.forEachChild(node, visit);
 }
 visit(tree);
-assert.equal(expectedRequests.length, 6, 'All independently loaded company sections are covered');
+assert.equal(expectedRequests.length, 5, 'All independently loaded company sections are covered');
 console.log('✓ Company loads exclude selection/panel state and guard stale responses');

@@ -16,7 +16,6 @@ import {
 	isTracePointCompany,
 	isTracePointComposition,
 	isTracePointCorporateActions,
-	isTracePointFreeFloat,
 	isTracePointOwnershipSnapshot,
 	isTracePointScreenerResponse,
 	isTraceVerification,
@@ -27,7 +26,6 @@ import type {
 	TracePointCompany,
 	TracePointComposition,
 	TracePointCorporateActions,
-	TracePointFreeFloat,
 	TracePointManagement,
 	TracePointOwnershipSnapshot,
 	TracePointScreenerResponse,
@@ -200,22 +198,6 @@ export async function verifyTraceCandidates(
 		}
 	}
 
-	return data;
-}
-
-// ---------------------------------------------------------------------------
-// Free float
-// ---------------------------------------------------------------------------
-
-export async function getFreeFloat(
-	ticker: string,
-): Promise<TracePointFreeFloat> {
-	const data = await apiFetch<TracePointFreeFloat>(
-		`/company-free-float?ticker=${encodeURIComponent(ticker)}`,
-	);
-	if (!isTracePointFreeFloat(data)) {
-		throw new Error(`Invalid free float response for ${ticker}`);
-	}
 	return data;
 }
 
