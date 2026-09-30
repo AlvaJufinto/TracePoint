@@ -91,7 +91,6 @@ export default function TraceGraph({
 	onRetryTrace,
 	onVerifyNext,
 	onClearTrace,
-	onOpenConnectedCompany,
 }: Props) {
 	const { expansion, activeTraceCount } = useMemo(() => {
 		const companyNode = reactFlowNodes.find((node) => node.id === ticker);
